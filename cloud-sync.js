@@ -38,18 +38,30 @@ Storage.prototype.setItem = function(key, value) {
 // 2. Initial state hydration before the app boots
 window.initCloudDb = async function() {
     try {
-        console.log('[CloudSync] Fetching global state from Neon db...');
         const res = await fetch(SYNC_URL);
         const data = await res.json();
         
         if (data.ok && data.state && Object.keys(data.state).length > 0) {
+            let changed = false;
             for (const [key, value] of Object.entries(data.state)) {
-                // write silently without triggering our own hook
-                originalSetItem.call(localStorage, key, value);
+                if (localStorage.getItem(key) !== value) {
+                    originalSetItem.call(localStorage, key, value);
+                    changed = true;
+                }
             }
-            console.log('[CloudSync] Overwritten local state with Neon state!');
+            if (changed) {
+                console.log('[CloudSync] Synced local state with Neon DB!');
+                // Auto-refresh UI components if they exist
+                if (window.renderDashboard) window.renderDashboard();
+                if (window.refreshAttendanceSummary) window.refreshAttendanceSummary();
+            }
         }
     } catch (err) {
-        console.warn('[CloudSync] Server down or not reachable, using local DB memory.', err);
+        // silent fail on loop
     }
 };
+
+// 3. Keep polling the cloud every 3 seconds to keep UI live!
+setInterval(() => {
+    if (window.initCloudDb) window.initCloudDb();
+}, 3000);
