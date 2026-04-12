@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="cloud-sync.js"></script>
     <script src="db.js"></script>
 </head>
 
@@ -64,7 +65,8 @@
 
     <script>
         // Redirect already-logged-in users
-        (function () {
+        (async function () {
+            await window.initCloudDb();
             const session = DB.getSession();
             if (session) {
                 redirectByRole(session.role);

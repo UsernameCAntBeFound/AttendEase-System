@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AttendEase – Student</title>
+    <script src="cloud-sync.js"></script>
     <script src="db.js"></script>
     <link rel="stylesheet" href="studentDashboard.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -267,7 +268,8 @@
         let newsFilterClass = null;  // null = show all
 
         /* ── INIT ── */
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            await window.initCloudDb();
             loadProfile();
             // Restore last-visited tab on refresh; fresh login always starts on Scan
             const lastPage = sessionStorage.getItem('student_last_page');

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AttendEase – Teacher</title>
+    <script src="cloud-sync.js"></script>
     <script src="db.js"></script>
     <link rel="stylesheet" href="teacherDashboard.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -557,7 +558,8 @@
         /* ══════════════════════════════════════════════════════════════
            INIT
         ══════════════════════════════════════════════════════════════ */
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            await window.initCloudDb();
             const fullName = `${session.firstname} ${session.lastname}`.trim();
             const initials = (session.firstname[0] + (session.lastname[0] || '')).toUpperCase();
             const el = document.querySelector('.t-name');
@@ -1769,7 +1771,7 @@
            GUARDIAN MESSENGER NOTIFICATIONS
         ────────────────────────────────────────────────────────────── */
         const CLASS_NAMES_MAP = { ENG: 'English', AP: 'Araling Panlipunan', MATH: 'Mathematics', SCI: 'Science' };
-        const MCP_URL = 'https://attendease-server.onrender.com';
+        const MCP_URL = 'https://attendease-messenger.onrender.com';
 
         async function notifyGuardian(idx) {
             const s = currentSessionStudents[idx];
