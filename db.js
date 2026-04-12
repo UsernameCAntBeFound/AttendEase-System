@@ -45,7 +45,7 @@
 //    '15:16'  → Late    ⚠
 //    '17:30'  → Absent  ✗
 // ══════════════════════════════════════════════════════════════════════════════
-const SIMULATED_TIME = '09:01';   // ← null = real clock | '09:16' = Late | '11:30' = Absent (English ended) | '13:30' = Absent (AP ended)
+const SIMULATED_TIME = null;   // ← null = real clock | '09:16' = Late | '11:30' = Absent (English ended) | '13:30' = Absent (AP ended)
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  DEVELOPER: CLEAR ALL ATTENDANCE TIMES
