@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendEase – Teacher</title>
+    <script src="db.js"></script>
+    <link rel="stylesheet" href="teacherDashboard.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+    <!-- ══════════════ SIDEBAR ══════════════ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="brand">AttendEase</div>
+            <button class="sidebar-close" id="sidebarClose" onclick="toggleSidebar()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="teacher-info">
+            <div class="t-avatar">MS</div>
+            <div>
+                <div class="t-name">Ms. Santos</div>
+                <div class="t-role">Teacher</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item" onclick="navigate('attendance')" id="nav-attendance">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4" />
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+                Attendance
+            </button>
+            <button class="nav-item active" onclick="navigate('qrcode')" id="nav-qrcode">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="3" height="3" rx="0.5" />
+                </svg>
+                QR Code
+            </button>
+            <button class="nav-item" onclick="navigate('news')" id="nav-news">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+                    <path d="M18 14h-8" />
+                    <path d="M15 18h-5" />
+                    <path d="M10 6h8v4h-8V6Z" />
+                </svg>
+                News
+            </button>
+            <button class="nav-item" onclick="navigate('reports')" id="nav-reports">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <line x1="10" y1="9" x2="8" y2="9" />
+                </svg>
+                Reports
+            </button>
+            <button class="nav-item" onclick="navigate('classes')" id="nav-classes">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+                Classes
+            </button>
+        </nav>
+
+        <button class="sign-out-btn" onclick="signOut()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sign Out
+        </button>
+    </aside>
+
+    <!-- ══════════════ MAIN ══════════════ -->
+    <div class="main-wrap" id="mainWrap">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="hamburger" onclick="toggleSidebar()">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="page-title" id="pageTitle">QR Code</div>
+            </div>
+            <div class="topbar-right">
+                <div class="search-box" id="searchBox" style="display:none">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" placeholder="Search students…" id="searchInput" oninput="filterStudents()">
+                </div>
+                <button class="icon-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ── PAGES ── -->
+        <main class="content">
+
+            <!-- ═══ ATTENDANCE PAGE ═══ -->
+            <section class="page" id="page-attendance">
+                <!-- Class selector bar -->
+                <div class="class-bar">
+                    <div class="class-selector">
+                        <label>Class</label>
+                        <select id="classSelect" onchange="loadClass()"></select>
+                    </div>
+                    <div class="class-selector">
+                        <label>Date</label>
+                        <input type="date" id="sessionDate" min="2026-04-12" max="2026-04-18">
+                    </div>
+                    <button class="btn-accent" id="markAllBtn" onclick="markAllPresent()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        All Present
+                    </button>
+                </div>
+                <!-- Class schedule badge -->
+                <div id="schedBadge"
+                    style="font-size:12px;color:var(--brand);font-weight:600;padding:4px 14px 6px;letter-spacing:.03em;opacity:.85">
+                </div>
+
+                <!-- Stats row — clickable chips -->
+                <div class="stats-row">
+                    <div class="stat-chip green clickable" id="chip-present" onclick="toggleStatusFilter('present')">
+                        <span id="presentCount">0</span> Present
+                    </div>
+                    <div class="stat-chip red clickable" id="chip-absent" onclick="toggleStatusFilter('absent')"><span
+                            id="absentCount">0</span> Absent</div>
+                    <div class="stat-chip yellow clickable" id="chip-excused" onclick="toggleStatusFilter('excused')">
+                        <span id="excusedCount">0</span> Excused
+                    </div>
+                    <div class="stat-chip clickable" id="chip-late"
+                        style="background:rgba(249,115,22,.12);color:#f97316" onclick="toggleStatusFilter('late')"><span
+                            id="lateCount">0</span> Late</div>
+                    <div class="stat-chip blue" id="chip-total"><span id="totalCount">0</span> Total</div>
+                    <button class="btn-accent" onclick="loadAttendanceSession()"
+                        style="margin-left:auto;padding:6px 12px;font-size:12px">
+                        ↻ Refresh
+                    </button>
+                    <button class="btn-notify-all" onclick="notifyAllAbsent()"
+                        title="Send Messenger notification to all absent &amp; late guardians">
+                        📩 Notify All Absent
+                    </button>
+                </div>
+
+                <!-- Split layout: 3/4 table | 1/4 map -->
+                <div class="att-split">
+
+                    <!-- LEFT: Student table (3/4) -->
+                    <div class="att-table-panel">
+                        <div class="table-card">
+                            <table class="student-table" id="studentTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Student Name</th>
+                                        <th>ID Number</th>
+                                        <th>Time In</th>
+                                        <th>Time Out</th>
+                                        <th>Status</th>
+                                        <th>Excuse Letter</th>
+                                        <th>Remarks</th>
+                                        <th>Notify</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: Geolocation map (1/4) -->
+                    <div class="att-map-panel">
+                        <div class="map-card">
+                            <div class="map-header">
+                                <span>&#128205; Student Locations</span>
+                                <span class="map-count" id="mapLocCount">0 located</span>
+                            </div>
+                            <div id="attendanceMap"></div>
+                            <div class="map-legend">
+                                <span class="ml present">&#11044; Present</span>
+                                <span class="ml late">&#11044; Late</span>
+                                <span class="ml absent">&#11044; Absent</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ═══ QR CODE PAGE ═══ -->
+            <section class="page active" id="page-qrcode">
+                <div class="qr-layout">
+                    <div class="qr-controls card">
+                        <h3 class="card-title">Generate QR Code</h3>
+                        <div class="form-group">
+                            <label>Select Class</label>
+                            <select id="qrClass"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="qrDate" min="2026-04-12" max="2026-04-18">
+                        </div>
+                        <div class="form-group">
+                            <label>Expires After (minutes)</label>
+                            <input type="number" id="qrExpiry" value="15" min="1" max="120">
+                        </div>
+                        <button class="btn-primary full" onclick="generateQR()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                            </svg>
+                            Generate QR
+                        </button>
+                    </div>
+
+                    <div class="qr-display card">
+                        <div class="qr-placeholder" id="qrPlaceholder">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                                <rect x="14" y="14" width="3" height="3" rx="0.5" />
+                            </svg>
+                            <p>Configure and generate your QR code</p>
+                        </div>
+                        <div id="qrOutput" hidden>
+                            <div class="qr-meta" id="qrMeta"></div>
+                            <div id="qrCanvas"></div>
+                            <div class="qr-timer" id="qrTimer"></div>
+                            <div class="qr-actions">
+                                <button class="btn-primary" onclick="downloadQR()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="7 10 12 15 17 10" />
+                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                    Download
+                                </button>
+                                <button class="btn-ghost" onclick="generateQR()">Regenerate</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ NEWS PAGE ═══ -->
+            <section class="page" id="page-news">
+                <!-- Post announcement card -->
+                <div class="card news-compose">
+                    <h3 class="card-title">📢 Post Announcement</h3>
+                    <div class="form-group">
+                        <label>Choose Class</label>
+                        <div class="news-class-pills" id="newsClassPills"></div>
+                    </div>
+                    <div class="compose-toolbar">
+                        <button class="toolbar-btn" onclick="formatText('bold')" title="Bold"><b>B</b></button>
+                        <button class="toolbar-btn" onclick="formatText('italic')" title="Italic"><i>I</i></button>
+                        <button class="toolbar-btn" onclick="formatText('underline')"
+                            title="Underline"><u>U</u></button>
+                        <button class="toolbar-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">•
+                            List</button>
+                        <div class="toolbar-divider"></div>
+                        <button class="toolbar-btn" onclick="document.getElementById('newsFileInput').click()"
+                            title="Attach File">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                            </svg>
+                            Attach
+                        </button>
+                        <input type="file" id="newsFileInput" accept="image/*,.pdf,.doc,.docx" hidden multiple
+                            onchange="handleNewsAttachments(event)">
+                    </div>
+                    <div class="compose-editor" contenteditable="true" id="newsEditor"
+                        placeholder="Write your announcement..."></div>
+                    <div class="compose-attachments" id="newsAttachmentPreview"></div>
+                    <button class="btn-primary full" onclick="postAnnouncement()" style="margin-top:12px">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
+                        Post Announcement
+                    </button>
+                </div>
+                <!-- Announcement feed -->
+                <div id="newsFeed" class="news-feed"></div>
+            </section>
+
+            <!-- ═══ REPORTS PAGE ═══ -->
+            <section class="page" id="page-reports">
+                <div class="reports-layout">
+                    <div class="card report-filter">
+                        <h3 class="card-title">Export Report</h3>
+                        <div class="form-group">
+                            <label>Class</label>
+                            <select id="rptClass" onchange="renderReportPreview()">
+                                <option value="ALL">All Subjects</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date From</label>
+                            <input type="date" id="rptFrom" min="2026-04-12" max="2026-04-18"
+                                onchange="renderReportPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Date To</label>
+                            <input type="date" id="rptTo" min="2026-04-12" max="2026-04-18"
+                                onchange="renderReportPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Format</label>
+                            <div class="format-toggle">
+                                <button class="fmt-btn active" id="fmtCSV" onclick="setFormat('CSV')">CSV</button>
+                                <button class="fmt-btn" id="fmtPDF" onclick="setFormat('PDF')">PDF</button>
+                            </div>
+                        </div>
+                        <button class="btn-primary full" onclick="exportReport()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            Export Report
+                        </button>
+                    </div>
+
+                    <div class="card report-preview">
+                        <h3 class="card-title">Preview</h3>
+                        <div class="preview-table-wrap">
+                            <table class="student-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>ID</th>
+                                        <th>Class</th>
+                                        <th>Present</th>
+                                        <th>Absent</th>
+                                        <th>Excused</th>
+                                        <th>Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportPreviewBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ CLASSES PAGE ═══ -->
+            <section class="page" id="page-classes">
+                <!-- Classes grid view -->
+                <div id="classesViewGrid">
+                    <div class="classes-top-bar">
+                        <h3 class="section-heading">My Classes</h3>
+                        <button class="btn-primary" onclick="openAddClassModal()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            Add Class
+                        </button>
+                    </div>
+                    <div class="classes-grid" id="classesGrid"></div>
+                </div>
+                <!-- Class detail view (hidden by default) -->
+                <div id="classDetailView" style="display:none">
+                    <button class="btn-back" onclick="closeClassDetail()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                        Back to Classes
+                    </button>
+                    <div class="detail-header card" id="detailHeader"></div>
+                    <div class="detail-stats" id="detailStats"></div>
+                    <div class="table-card" id="detailStudentTable"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ═══ EXCUSE MODAL ═══ -->
+    <div class="modal-overlay" id="excuseModal" hidden onclick="closeExcuseModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Attach Excuse Letter</h3>
+                <button class="modal-close" onclick="closeExcuseModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <p class="modal-student" id="modalStudentName"></p>
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('excuseFile').click()">
+                <input type="file" id="excuseFile" accept="image/*,.pdf" hidden onchange="previewExcuse(event)">
+                <div id="uploadPrompt">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <p><strong>Click to upload</strong> or drag & drop</p>
+                    <span>PNG, JPG, PDF up to 10MB</span>
+                </div>
+                <img id="excusePreview" hidden style="max-width:100%;max-height:200px;border-radius:8px;">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-ghost" onclick="closeExcuseModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveExcuse()">Save & Mark Excused</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ADD / EDIT CLASS MODAL ═══ -->
+    <div class="modal-overlay" id="classModal" hidden onclick="closeClassModal(event)">
+        <div class="modal-box modal-wide" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="classModalTitle">Add New Class</h3>
+                <button class="modal-close" onclick="closeClassModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body-scroll">
+                <div class="class-form-grid">
+                    <div class="form-group">
+                        <label>Class Code</label>
+                        <input type="text" id="classCode" placeholder="e.g. FIL" maxlength="10"
+                            style="text-transform:uppercase">
+                    </div>
+                    <div class="form-group">
+                        <label>Class Name</label>
+                        <input type="text" id="className" placeholder="e.g. Filipino">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" id="classStartTime">
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" id="classEndTime">
+                    </div>
+                </div>
+                <div class="student-picker">
+                    <div class="picker-header">
+                        <h4>Add Students</h4>
+                        <div class="picker-controls">
+                            <label style="font-size:11px;font-weight:600;color:var(--text-muted)">FILTER BY
+                                SECTION</label>
+                            <select id="sectionFilter" onchange="filterStudentPicker()">
+                                <option value="ALL">All Sections</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="picker-actions">
+                        <button class="btn-accent" onclick="selectAllVisible()"
+                            style="font-size:12px;padding:6px 12px">Select All Visible</button>
+                        <button class="btn-ghost" onclick="deselectAll()"
+                            style="font-size:12px;padding:6px 12px">Deselect All</button>
+                        <span class="selected-count" id="selectedCount">0 selected</span>
+                    </div>
+                    <div class="student-picker-list" id="studentPickerList"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-ghost" onclick="closeClassModal()">Cancel</button>
+                <button class="btn-primary" id="saveClassBtn" onclick="saveClass()">Save Class</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST ═══ -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /* ══════════════════════════════════════════════════════════════
+           SESSION / AUTH
+        ══════════════════════════════════════════════════════════════ */
+        const session = DB.requireAuth(['teacher']);
+        if (!session) throw new Error('Not authenticated');
+
+        /* ══════════════════════════════════════════════════════════════
+           STATE
+        ══════════════════════════════════════════════════════════════ */
+        let teacherData = DB.getTeacherData(session.id);
+        let currentClassCode = null;
+        let currentDate = null;
+        let currentSessionStudents = [];
+        let currentExcuseIndex = null;
+        let reportFormat = 'CSV';
+        let qrTimerInterval = null;
+        let chartInstances = {};
+        let allPresentState = false;
+        let previousStatuses = [];
+        let currentStatusFilter = null;
+        let editingClassCode = null;  // null = add mode, string = edit mode
+        let newsAttachments = [];     // pending attachments for new announcement
+        let selectedNewsClass = null;
+
+        /* ══════════════════════════════════════════════════════════════
+           INIT
+        ══════════════════════════════════════════════════════════════ */
+        window.addEventListener('DOMContentLoaded', () => {
+            const fullName = `${session.firstname} ${session.lastname}`.trim();
+            const initials = (session.firstname[0] + (session.lastname[0] || '')).toUpperCase();
+            const el = document.querySelector('.t-name');
+            const av = document.querySelector('.t-avatar');
+            if (el) el.textContent = fullName;
+            if (av) av.textContent = initials;
+
+            const today = new Date().toISOString().slice(0, 10);
+            const defDate = (today >= '2026-04-12' && today <= '2026-04-18') ? today : '2026-04-12';
+            document.getElementById('sessionDate').value = defDate;
+            document.getElementById('qrDate').value = defDate;
+            document.getElementById('rptFrom').value = '2026-04-12';
+            document.getElementById('rptTo').value = '2026-04-18';
+
+            populateClassDropdowns();
+            currentClassCode = document.getElementById('classSelect').value;
+            currentDate = '2026-04-12';
+            loadAttendanceSession();
+            renderReportPreview();
+            renderClasses();
+            renderNewsFeed();
+
+            // Restore last-visited tab on refresh; fresh login always starts on QR Code
+            const lastPage = sessionStorage.getItem('teacher_last_page');
+            if (lastPage && document.getElementById('page-' + lastPage)) {
+                navigate(lastPage);
+            }
+        });
+
+        /** Populate all class dropdowns from teacher data */
+        function populateClassDropdowns() {
+            teacherData = DB.getTeacherData(session.id);
+            const classes = teacherData.classes || [];
+
+            // Attendance class selector
+            const classSelect = document.getElementById('classSelect');
+            classSelect.innerHTML = classes.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
+
+            // QR class selector
+            const qrClass = document.getElementById('qrClass');
+            qrClass.innerHTML = classes.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
+
+            // Report class selector
+            const rptClass = document.getElementById('rptClass');
+            rptClass.innerHTML = '<option value="ALL">All Subjects</option>' +
+                classes.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           NAVIGATION
+        ══════════════════════════════════════════════════════════════ */
+        const PAGE_TITLES = { attendance: 'Attendance', qrcode: 'QR Code', news: 'News', reports: 'Reports', classes: 'Classes' };
+
+        function navigate(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            document.getElementById('nav-' + page).classList.add('active');
+            document.getElementById('pageTitle').textContent = PAGE_TITLES[page];
+            document.getElementById('searchBox').style.display = page === 'attendance' ? '' : 'none';
+            if (page === 'attendance') { loadAttendanceSession(); }
+            if (page === 'classes') { teacherData = DB.getTeacherData(session.id); renderClasses(); closeClassDetail(); }
+            if (page === 'news') { renderNewsFeed(); renderNewsClassPills(); }
+            // Persist last-visited tab so refresh stays on same page
+            sessionStorage.setItem('teacher_last_page', page);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('mainWrap').classList.toggle('shifted');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           ATTENDANCE — load / save session
+        ══════════════════════════════════════════════════════════════ */
+        function loadAttendanceSession() {
+            currentClassCode = document.getElementById('classSelect').value;
+            currentDate = document.getElementById('sessionDate').value;
+            teacherData = DB.getTeacherData(session.id);
+            allPresentState = false;
+            previousStatuses = [];
+            currentStatusFilter = null;
+            updateFilterChipStyles();
+            updateMarkAllBtn();
+
+            const sched = DB.schedules[currentClassCode];
+            const badge = document.getElementById('schedBadge');
+            if (badge) badge.textContent = sched ? `🕒 Schedule: ${sched.display}` : '';
+
+            const key = `${currentClassCode}_${currentDate}`;
+            const savedRecords = teacherData.sessions[key]
+                ? JSON.parse(JSON.stringify(teacherData.sessions[key]))
+                : [];
+
+            const recordMap = {};
+            savedRecords.forEach(r => { recordMap[r.studentId] = true; });
+
+            DB.getAll()
+                .filter(u => u.role === 'student')
+                .forEach(student => {
+                    if (!recordMap[student.uid]) {
+                        savedRecords.push({
+                            studentId: student.uid,
+                            name: `${student.firstname} ${student.lastname}`.trim(),
+                            status: 'absent',
+                            timeIn: null,
+                            timeOut: null,
+                            remark: '',
+                            excuse: null,
+                        });
+                    }
+                });
+
+            currentSessionStudents = savedRecords;
+            renderStudentTable(filterStudentsData());
+        }
+
+        function saveAttendanceSession() {
+            DB.saveSession_attendance(session.id, currentClassCode, currentDate, currentSessionStudents);
+            teacherData = DB.getTeacherData(session.id);
+        }
+
+        function loadClass() { loadAttendanceSession(); }
+
+        function renderStudentTable(list) {
+            const tbody = document.getElementById('studentBody');
+            tbody.innerHTML = '';
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;opacity:.5">No students in this session yet.</td></tr>`;
+                updateStats();
+                return;
+            }
+            list.forEach((s, i) => {
+                // Find the real index in currentSessionStudents for this record
+                const realIdx = currentSessionStudents.findIndex(r => r.studentId === s.studentId);
+                tbody.innerHTML += `
+        <tr id="row-${realIdx}" class="${s.status}">
+            <td class="row-num">${i + 1}</td>
+            <td class="student-name">${s.name}</td>
+            <td class="student-id">${s.studentId}</td>
+            <td>${s.timeIn ? `<span class="time-badge in">${s.timeIn}</span>` : '<span class="no-action">—</span>'}</td>
+            <td>${s.timeOut ? `<span class="time-badge out">${s.timeOut}</span>` : '<span class="no-action">—</span>'}</td>
+            <td>
+                <div class="status-group">
+                    <label class="status-radio present-radio ${s.status === 'present' ? 'active' : ''}">
+                        <input type="radio" name="st-${realIdx}" value="present" ${s.status === 'present' ? 'checked' : ''} onchange="setStatus(${realIdx},'present')">Present
+                    </label>
+                    <label class="status-radio absent-radio ${s.status === 'absent' ? 'active' : ''}">
+                        <input type="radio" name="st-${realIdx}" value="absent" ${s.status === 'absent' ? 'checked' : ''} onchange="setStatus(${realIdx},'absent')">Absent
+                    </label>
+                    <label class="status-radio" style="${s.status === 'late' ? 'background:rgba(249,115,22,.15);color:#f97316;border-color:#f97316' : ''}">
+                        <input type="radio" name="st-${realIdx}" value="late" ${s.status === 'late' ? 'checked' : ''} onchange="setStatus(${realIdx},'late')">Late
+                    </label>
+                    <label class="status-radio excused-radio ${s.status === 'excused' ? 'active' : ''}">
+                        <input type="radio" name="st-${realIdx}" value="excused" ${s.status === 'excused' ? 'checked' : ''} onchange="setStatus(${realIdx},'excused')">Excused
+                    </label>
+                </div>
+            </td>
+            <td>
+                ${s.status === 'excused' ? `
+                    <button class="attach-btn ${s.excuse ? 'has-file' : ''}" onclick="openExcuseModal(${realIdx})">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        ${s.excuse ? 'View/Change' : 'Attach'}
+                    </button>` : ''}
+            </td>
+            <td><input class="remark-input" type="text" placeholder="Add note..." value="${s.remark || ''}" onchange="setRemark(${realIdx}, this.value)"></td>
+            <td>${(s.status === 'absent' || s.status === 'late') ? `<button class="notify-btn" id="notify-btn-${realIdx}" onclick="notifyGuardian(${realIdx})">📩 Notify</button>` : ''}</td>
+        </tr>`;
+            });
+            updateStats();
+            // Update map every time table renders
+            updateAttendanceMap(currentSessionStudents);
+        }
+
+        function setStatus(idx, status) {
+            currentSessionStudents[idx].status = status;
+            if (status !== 'excused') currentSessionStudents[idx].excuse = null;
+            allPresentState = false;
+            updateMarkAllBtn();
+            saveAttendanceSession();
+            renderStudentTable(filterStudentsData());
+            updateStats();
+        }
+
+        function setRemark(idx, value) {
+            currentSessionStudents[idx].remark = value;
+            saveAttendanceSession();
+        }
+
+        function updateStats() {
+            const list = currentSessionStudents;
+            document.getElementById('presentCount').textContent = list.filter(s => s.status === 'present').length;
+            document.getElementById('absentCount').textContent = list.filter(s => s.status === 'absent').length;
+            document.getElementById('excusedCount').textContent = list.filter(s => s.status === 'excused').length;
+            document.getElementById('lateCount').textContent = list.filter(s => s.status === 'late').length;
+            document.getElementById('totalCount').textContent = list.length;
+        }
+
+        /* ── Mark All Present / Undo ── */
+        function markAllPresent() {
+            if (allPresentState) {
+                // UNDO — restore previous statuses
+                previousStatuses.forEach((saved, i) => {
+                    if (currentSessionStudents[i]) {
+                        currentSessionStudents[i].status = saved.status;
+                        currentSessionStudents[i].excuse = saved.excuse;
+                    }
+                });
+                allPresentState = false;
+                saveAttendanceSession();
+                renderStudentTable(filterStudentsData());
+                showToast('↩ Action undone — statuses restored');
+            } else {
+                // MARK ALL — save current state first
+                previousStatuses = currentSessionStudents.map(s => ({ status: s.status, excuse: s.excuse }));
+                currentSessionStudents.forEach(s => { s.status = 'present'; s.excuse = null; });
+                allPresentState = true;
+                saveAttendanceSession();
+                renderStudentTable(filterStudentsData());
+                showToast('All students marked as Present ✓ (click again to undo)');
+            }
+            updateMarkAllBtn();
+        }
+
+        function updateMarkAllBtn() {
+            const btn = document.getElementById('markAllBtn');
+            if (allPresentState) {
+                btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l5-5m0 0l5 5M8 7v10"/></svg> Undo All Present`;
+                btn.classList.add('undo-active');
+            } else {
+                btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> All Present`;
+                btn.classList.remove('undo-active');
+            }
+        }
+
+        /* ── Clickable status filter chips ── */
+        function toggleStatusFilter(status) {
+            if (currentStatusFilter === status) {
+                currentStatusFilter = null; // unclick = show all
+            } else {
+                currentStatusFilter = status;
+            }
+            updateFilterChipStyles();
+            renderStudentTable(filterStudentsData());
+        }
+
+        function updateFilterChipStyles() {
+            ['present', 'absent', 'excused', 'late'].forEach(s => {
+                const chip = document.getElementById('chip-' + s);
+                if (chip) {
+                    chip.classList.toggle('chip-active', currentStatusFilter === s);
+                }
+            });
+        }
+
+        function filterStudents() {
+            renderStudentTable(filterStudentsData());
+        }
+
+        function filterStudentsData() {
+            let list = currentSessionStudents;
+            // Status filter from chips
+            if (currentStatusFilter) {
+                list = list.filter(s => s.status === currentStatusFilter);
+            }
+            // Search filter
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            if (q) {
+                list = list.filter(s => s.name.toLowerCase().includes(q) || s.studentId.includes(q));
+            }
+            return list;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           EXCUSE MODAL
+        ══════════════════════════════════════════════════════════════ */
+        function openExcuseModal(idx) {
+            currentExcuseIndex = idx;
+            document.getElementById('modalStudentName').textContent = '📎 ' + currentSessionStudents[idx].name;
+            const preview = document.getElementById('excusePreview');
+            const prompt = document.getElementById('uploadPrompt');
+            if (currentSessionStudents[idx].excuse) {
+                preview.src = currentSessionStudents[idx].excuse;
+                preview.hidden = false;
+                prompt.hidden = true;
+            } else {
+                preview.hidden = true;
+                prompt.hidden = false;
+            }
+            document.getElementById('excuseModal').hidden = false;
+            document.getElementById('excuseFile').value = '';
+        }
+
+        function closeExcuseModal(e) {
+            if (!e || e.target === document.getElementById('excuseModal'))
+                document.getElementById('excuseModal').hidden = true;
+        }
+
+        function previewExcuse(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = document.getElementById('excusePreview');
+                const pmt = document.getElementById('uploadPrompt');
+                if (file.type.startsWith('image/')) {
+                    img.src = ev.target.result;
+                    img.hidden = false;
+                    pmt.hidden = true;
+                } else {
+                    pmt.innerHTML = `<strong style="color:var(--brand)">📄 ${file.name}</strong><p style="font-size:12px;margin-top:4px">PDF attached</p>`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveExcuse() {
+            const file = document.getElementById('excuseFile').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    currentSessionStudents[currentExcuseIndex].excuse = ev.target.result;
+                    saveAttendanceSession();
+                };
+                reader.readAsDataURL(file);
+            }
+            currentSessionStudents[currentExcuseIndex].status = 'excused';
+            document.getElementById('excuseModal').hidden = true;
+            saveAttendanceSession();
+            renderStudentTable(filterStudentsData());
+            showToast('Excuse letter saved ✓');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           QR CODE
+        ══════════════════════════════════════════════════════════════ */
+        function generateQR() {
+            const cls = document.getElementById('qrClass').value;
+            const date = document.getElementById('qrDate').value;
+            const expiry = parseInt(document.getElementById('qrExpiry').value) || 15;
+
+            if (!date || date < '2026-04-12' || date > '2026-04-18') {
+                showToast('⚠ Please select a date between April 12 and April 18, 2026.');
+                return;
+            }
+
+            const payload = JSON.stringify({ cls, date, ts: Date.now(), exp: expiry });
+
+            const container = document.getElementById('qrCanvas');
+            container.innerHTML = '';
+            new QRCode(container, {
+                text: payload,
+                width: 200, height: 200,
+                colorDark: "#1e1b4b", colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H,
+            });
+
+            teacherData = DB.getTeacherData(session.id);
+            const classObj = (teacherData.classes || []).find(c => c.code === cls);
+            document.getElementById('qrMeta').innerHTML =
+                `<strong>${classObj ? classObj.name : cls}</strong> &bull; ${date}`;
+
+            document.getElementById('qrPlaceholder').hidden = true;
+            document.getElementById('qrOutput').hidden = false;
+
+            if (qrTimerInterval) clearInterval(qrTimerInterval);
+            let remaining = expiry * 60;
+            const timerEl = document.getElementById('qrTimer');
+            const qrTick = () => {
+                if (remaining <= 0) { clearInterval(qrTimerInterval); timerEl.textContent = 'QR Expired'; timerEl.style.color = 'var(--red)'; return; }
+                const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const s = String(remaining % 60).padStart(2, '0');
+                timerEl.textContent = `${m}:${s}`;
+                remaining--;
+            };
+            qrTick();
+            qrTimerInterval = setInterval(qrTick, 1000);
+            showToast('QR Code generated ✓');
+        }
+
+        function downloadQR() {
+            const img = document.querySelector('#qrCanvas img');
+            if (!img) return;
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = 'attendease-qr.png';
+            a.click();
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           NEWS / ANNOUNCEMENTS
+        ══════════════════════════════════════════════════════════════ */
+        function renderNewsClassPills() {
+            teacherData = DB.getTeacherData(session.id);
+            const container = document.getElementById('newsClassPills');
+            const classes = teacherData.classes || [];
+            container.innerHTML = classes.map(c =>
+                `<button class="news-pill ${selectedNewsClass === c.code ? 'active' : ''}" onclick="selectNewsClass('${c.code}')">${c.code}</button>`
+            ).join('');
+        }
+
+        function selectNewsClass(code) {
+            selectedNewsClass = selectedNewsClass === code ? null : code;
+            renderNewsClassPills();
+        }
+
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('newsEditor').focus();
+        }
+
+        function handleNewsAttachments(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    newsAttachments.push({
+                        name: file.name,
+                        dataUrl: ev.target.result,
+                        type: file.type,
+                    });
+                    renderAttachmentPreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+
+        function renderAttachmentPreviews() {
+            const container = document.getElementById('newsAttachmentPreview');
+            container.innerHTML = newsAttachments.map((att, i) => {
+                const isImage = att.type.startsWith('image/');
+                return `<div class="attachment-chip">
+                    ${isImage ? `<img src="${att.dataUrl}" class="att-thumb">` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`}
+                    <span>${att.name}</span>
+                    <button class="att-remove" onclick="removeAttachment(${i})">×</button>
+                </div>`;
+            }).join('');
+        }
+
+        function removeAttachment(idx) {
+            newsAttachments.splice(idx, 1);
+            renderAttachmentPreviews();
+        }
+
+        function postAnnouncement() {
+            const editor = document.getElementById('newsEditor');
+            const caption = editor.innerHTML.trim();
+
+            if (!caption && newsAttachments.length === 0) {
+                showToast('⚠ Please write something or attach a file.');
+                return;
+            }
+            if (!selectedNewsClass) {
+                showToast('⚠ Please choose a class for this announcement.');
+                return;
+            }
+
+            teacherData = DB.getTeacherData(session.id);
+            if (!teacherData.announcements) teacherData.announcements = [];
+
+            teacherData.announcements.unshift({
+                id: Date.now(),
+                classCode: selectedNewsClass,
+                caption: caption,
+                attachments: [...newsAttachments],
+                createdAt: new Date().toISOString(),
+            });
+
+            DB.saveTeacherData(session.id, teacherData);
+
+            // Clear form
+            editor.innerHTML = '';
+            newsAttachments = [];
+            renderAttachmentPreviews();
+            selectedNewsClass = null;
+            renderNewsClassPills();
+            renderNewsFeed();
+            showToast('Announcement posted ✓');
+        }
+
+        function renderNewsFeed() {
+            teacherData = DB.getTeacherData(session.id);
+            const feed = document.getElementById('newsFeed');
+            const announcements = teacherData.announcements || [];
+
+            if (!announcements.length) {
+                feed.innerHTML = '<div class="empty-feed"><p>No announcements yet. Post one above!</p></div>';
+                return;
+            }
+
+            const classMap = {};
+            (teacherData.classes || []).forEach(c => { classMap[c.code] = c.name; });
+
+            feed.innerHTML = announcements.map(a => {
+                const date = new Date(a.createdAt);
+                const timeStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+                    ' at ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                const attachHTML = (a.attachments || []).map(att => {
+                    const isImage = att.type && att.type.startsWith('image/');
+                    return isImage
+                        ? `<div class="feed-attachment">
+                            <img src="${att.dataUrl}" class="feed-img" onclick="openAttachmentDownload('${att.dataUrl}', '${att.name}')">
+                            <button class="download-btn" onclick="openAttachmentDownload('${att.dataUrl}', '${att.name}')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download
+                            </button>
+                           </div>`
+                        : `<div class="feed-file" onclick="openAttachmentDownload('${att.dataUrl}', '${att.name}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            <span>${att.name}</span>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                           </div>`;
+                }).join('');
+
+                return `<div class="news-card card">
+                    <div class="news-card-top">
+                        <span class="news-class-badge">${a.classCode} — ${classMap[a.classCode] || a.classCode}</span>
+                        <div class="news-meta">
+                            <span>${timeStr}</span>
+                            <button class="news-delete" onclick="deleteAnnouncement(${a.id})" title="Delete">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="news-caption">${a.caption}</div>
+                    ${attachHTML ? `<div class="news-attachments">${attachHTML}</div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function openAttachmentDownload(dataUrl, fileName) {
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = fileName;
+            a.click();
+        }
+
+        function deleteAnnouncement(id) {
+            teacherData = DB.getTeacherData(session.id);
+            teacherData.announcements = (teacherData.announcements || []).filter(a => a.id !== id);
+            DB.saveTeacherData(session.id, teacherData);
+            renderNewsFeed();
+            showToast('Announcement deleted');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           REPORTS
+        ══════════════════════════════════════════════════════════════ */
+        function renderReportPreview() {
+            teacherData = DB.getTeacherData(session.id);
+            const tbody = document.getElementById('reportPreviewBody');
+            tbody.innerHTML = '';
+
+            const classes = teacherData.classes || [];
+            const CLASS_NAMES = {};
+            classes.forEach(c => { CLASS_NAMES[c.code] = c.name; });
+            const CLASS_ORDER = classes.map(c => c.code);
+
+            const selectedCls = document.getElementById('rptClass').value;
+            const fromDate = document.getElementById('rptFrom').value;
+            const toDate = document.getElementById('rptTo').value;
+
+            const clsMap = {};
+            Object.entries(teacherData.sessions || {}).forEach(([key, records]) => {
+                const [cls, date] = key.split('_');
+                if (selectedCls !== 'ALL' && cls !== selectedCls) return;
+                if (fromDate && date < fromDate) return;
+                if (toDate && date > toDate) return;
+                if (!clsMap[cls]) clsMap[cls] = {};
+                records.forEach(r => {
+                    if (!clsMap[cls][r.studentId])
+                        clsMap[cls][r.studentId] = { name: r.name, id: r.studentId, present: 0, absent: 0, late: 0, excused: 0 };
+                    const st = clsMap[cls][r.studentId];
+                    if (r.status === 'present') st.present++;
+                    else if (r.status === 'absent') st.absent++;
+                    else if (r.status === 'late') st.late++;
+                    else if (r.status === 'excused') st.excused++;
+                });
+            });
+
+            const clsKeys = CLASS_ORDER.filter(c => (selectedCls === 'ALL' || c === selectedCls) && clsMap[c]);
+            if (!clsKeys.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;opacity:.5">No attendance data for the selected filters.</td></tr>`;
+                return;
+            }
+
+            clsKeys.forEach(cls => {
+                tbody.innerHTML += `<tr style="background:rgba(99,102,241,.12)">
+                    <td colspan="7" style="font-weight:700;color:var(--brand);padding:6px 10px;font-size:13px">
+                        ${CLASS_NAMES[cls] || cls} &bull; <span style="font-weight:400;font-size:11px;opacity:.8">${DB.schedules[cls] ? DB.schedules[cls].display : ''}</span>
+                    </td></tr>`;
+                const students = Object.values(clsMap[cls]);
+                students.forEach(s => {
+                    const total = s.present + s.absent + s.late + s.excused || 1;
+                    const rate = Math.round(((s.present + s.late) / total) * 100);
+                    tbody.innerHTML += `<tr>
+                        <td>${s.name}</td>
+                        <td>${s.id}</td>
+                        <td><span style="font-size:11px;opacity:.7">${CLASS_NAMES[cls] || cls}</span></td>
+                        <td><span class="chip green">${s.present}</span></td>
+                        <td><span class="chip red">${s.absent}</span></td>
+                        <td><span class="chip yellow">${s.excused}</span></td>
+                        <td><span class="chip ${rate >= 80 ? 'green' : rate >= 60 ? 'yellow' : 'red'}">${rate}%</span></td>
+                    </tr>`;
+                });
+            });
+        }
+
+        function exportCSV() {
+            teacherData = DB.getTeacherData(session.id);
+            const classes = teacherData.classes || [];
+            const CLASS_NAMES = {};
+            classes.forEach(c => { CLASS_NAMES[c.code] = c.name; });
+            const CLASS_ORDER = classes.map(c => c.code);
+            const selectedCls = document.getElementById('rptClass').value;
+            const fromDate = document.getElementById('rptFrom').value;
+            const toDate = document.getElementById('rptTo').value;
+
+            const clsMap = {};
+            Object.entries(teacherData.sessions || {}).forEach(([key, records]) => {
+                const [cls, date] = key.split('_');
+                if (selectedCls !== 'ALL' && cls !== selectedCls) return;
+                if (fromDate && date < fromDate) return;
+                if (toDate && date > toDate) return;
+                if (!clsMap[cls]) clsMap[cls] = {};
+                records.forEach(r => {
+                    if (!clsMap[cls][r.studentId])
+                        clsMap[cls][r.studentId] = { name: r.name, id: r.studentId, present: 0, absent: 0, late: 0, excused: 0 };
+                    const st = clsMap[cls][r.studentId];
+                    if (r.status === 'present') st.present++;
+                    else if (r.status === 'absent') st.absent++;
+                    else if (r.status === 'late') st.late++;
+                    else if (r.status === 'excused') st.excused++;
+                });
+            });
+
+            const clsKeys = CLASS_ORDER.filter(c => (selectedCls === 'ALL' || c === selectedCls) && clsMap[c]);
+            if (!clsKeys.length) { showToast('No data to export.'); return; }
+
+            const q = v => `"${String(v).replace(/"/g, '""')}"`;
+            const lines = [
+                q('AttendEase - Attendance Report'),
+                q('Period: ' + fromDate + ' to ' + toDate + '  |  Generated: ' + new Date().toLocaleDateString()),
+                '',
+                ['Subject', 'Student Name', 'Student ID', 'Present', 'Absent', 'Late', 'Excused', 'Attendance Rate'].map(q).join(','),
+            ];
+
+            clsKeys.forEach(cls => {
+                Object.values(clsMap[cls]).forEach(s => {
+                    const total = s.present + s.absent + s.late + s.excused || 1;
+                    const rate = Math.round(((s.present + s.late) / total) * 100);
+                    lines.push([CLASS_NAMES[cls] || cls, s.name, s.id, s.present, s.absent, s.late, s.excused, rate + '%'].map(q).join(','));
+                });
+                lines.push('');
+            });
+
+            const csv = lines.join('\n');
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'attendance_report.csv';
+            a.click();
+            showToast('CSV exported ✓');
+        }
+
+        function exportPDF() {
+            var fromDate = document.getElementById('rptFrom').value;
+            var toDate = document.getElementById('rptTo').value;
+            if (!fromDate || !toDate || fromDate < '2026-04-12' || toDate > '2026-04-18' || fromDate > toDate) {
+                showToast('⚠ Report dates must be within April 12–18, 2026.');
+                return;
+            }
+
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF();
+
+            teacherData = DB.getTeacherData(session.id);
+            const classes = teacherData.classes || [];
+            const CLASS_NAMES = {};
+            classes.forEach(c => { CLASS_NAMES[c.code] = c.name; });
+            const CLASS_ORDER = classes.map(c => c.code);
+            var selectedCls = document.getElementById('rptClass').value;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('AttendEase - Attendance Report', 14, 18);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.text('Period: ' + fromDate + ' to ' + toDate + '   |   Generated: ' + new Date().toLocaleDateString(), 14, 26);
+
+            var clsMap = {};
+            Object.entries(teacherData.sessions || {}).forEach(function ([key, records]) {
+                var parts = key.split('_');
+                var cls = parts[0]; var date = parts[1];
+                if (selectedCls !== 'ALL' && cls !== selectedCls) return;
+                if (date < fromDate || date > toDate) return;
+                if (!clsMap[cls]) clsMap[cls] = {};
+                records.forEach(function (r) {
+                    if (!clsMap[cls][r.studentId])
+                        clsMap[cls][r.studentId] = { name: r.name, id: r.studentId, present: 0, absent: 0, late: 0, excused: 0 };
+                    var st = clsMap[cls][r.studentId];
+                    if (r.status === 'present') st.present++;
+                    else if (r.status === 'absent') st.absent++;
+                    else if (r.status === 'late') st.late++;
+                    else if (r.status === 'excused') st.excused++;
+                });
+            });
+
+            var clsKeys = CLASS_ORDER.filter(function (c) { return (selectedCls === 'ALL' || c === selectedCls) && clsMap[c]; });
+            if (!clsKeys.length) { showToast('No data to export.'); return; }
+
+            var headers = ['Name', 'ID', 'Subject', 'Present', 'Absent', 'Late', 'Excused', 'Rate'];
+            var colW = [52, 22, 22, 14, 14, 14, 14, 16];
+            var y = 36;
+
+            clsKeys.forEach(function (cls) {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.text(CLASS_NAMES[cls] || cls, 14, y); y += 6;
+                doc.setFontSize(8);
+                var cx = 14;
+                headers.forEach(function (h, i) { doc.text(h, cx, y); cx += colW[i]; });
+                y += 4;
+                doc.setLineWidth(0.2);
+                doc.line(14, y, 196, y); y += 5;
+                doc.setFont('helvetica', 'normal');
+
+                Object.values(clsMap[cls]).forEach(function (s) {
+                    var total = s.present + s.absent + s.late + s.excused || 1;
+                    var rate = Math.round(((s.present + s.late) / total) * 100);
+                    var row = [
+                        s.name.substring(0, 24), s.id.substring(0, 12), (CLASS_NAMES[cls] || cls).substring(0, 10),
+                        String(s.present), String(s.absent), String(s.late), String(s.excused), rate + '%'
+                    ];
+                    cx = 14;
+                    row.forEach(function (v, i) { doc.text(v, cx, y); cx += colW[i]; });
+                    y += 7;
+                    if (y > 270) { doc.addPage(); y = 20; }
+                });
+                y += 4;
+            });
+
+            doc.save('attendance_report.pdf');
+            showToast('PDF exported ✓');
+        }
+
+        function setFormat(fmt) {
+            reportFormat = fmt;
+            document.getElementById('fmtCSV').classList.toggle('active', fmt === 'CSV');
+            document.getElementById('fmtPDF').classList.toggle('active', fmt === 'PDF');
+        }
+
+        function exportReport() {
+            var fromDate = document.getElementById('rptFrom').value;
+            var toDate = document.getElementById('rptTo').value;
+            if (!fromDate || !toDate || fromDate < '2026-04-12' || toDate > '2026-04-18' || fromDate > toDate) {
+                showToast('⚠ Report dates must be within April 12–18, 2026.');
+                return;
+            }
+            if (reportFormat === 'CSV') exportCSV();
+            else exportPDF();
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           CLASSES — Grid, Detail View, Add/Edit
+        ══════════════════════════════════════════════════════════════ */
+        function renderClasses() {
+            const grid = document.getElementById('classesGrid');
+            grid.innerHTML = '';
+            teacherData = DB.getTeacherData(session.id);
+            const classes = teacherData.classes || [];
+
+            if (!classes.length) {
+                grid.innerHTML = `<p style="opacity:.5;padding:24px">No classes configured. Click "Add Class" to get started.</p>`;
+                return;
+            }
+
+            const WEEK_DATES = ['2026-04-12', '2026-04-13', '2026-04-14', '2026-04-15', '2026-04-16', '2026-04-17', '2026-04-18'];
+            const WEEK_LABELS = ['Apr 12', 'Apr 13', 'Apr 14', 'Apr 15', 'Apr 16', 'Apr 17', 'Apr 18'];
+
+            classes.forEach(cls => {
+                const dailyRates = WEEK_DATES.map(date => {
+                    const key = `${cls.code}_${date}`;
+                    const records = (teacherData.sessions || {})[key];
+                    if (!records || !records.length) return null;
+                    const present = records.filter(r => r.status === 'present' || r.status === 'late').length;
+                    return Math.round((present / records.length) * 100);
+                });
+
+                const validRates = dailyRates.filter(r => r !== null);
+                const avg = validRates.length
+                    ? Math.round(validRates.reduce((a, b) => a + b, 0) / validRates.length)
+                    : 0;
+                const color = avg >= 90 ? '#22c55e' : avg >= 75 ? '#f59e0b' : avg > 0 ? '#ef4444' : '#6366f1';
+
+                const enrolledCount = (cls.enrolledStudents && cls.enrolledStudents.length > 0)
+                    ? cls.enrolledStudents.length
+                    : DB.getAll().filter(u => u.role === 'student').length;
+
+                const div = document.createElement('div');
+                div.className = 'class-analytics-card card clickable-card';
+                div.onclick = () => openClassDetail(cls.code);
+                div.innerHTML = `
+            <div class="ca-header">
+                <div>
+                    <div class="ca-code">${cls.code}</div>
+                    <div class="ca-name">${cls.name}</div>
+                    <div class="ca-sched">${cls.schedule || 'No schedule set'} &bull; ${enrolledCount} students</div>
+                </div>
+                <div class="ca-rate" style="color:${color}">${avg > 0 ? avg + '%' : 'No data'}</div>
+            </div>
+            <div class="ca-bar-wrap">
+                <div class="ca-bar-fill" style="width:${avg}%; background:${color}88;border-color:${color}"></div>
+            </div>
+            <div style="position:relative;height:110px;width:100%">
+                <canvas id="chart-${cls.code}"></canvas>
+            </div>
+            <div class="ca-legend">
+                <span class="legend-dot" style="background:${color}"></span>
+                <span>Daily Attendance Rate (%) &mdash; Apr 12&ndash;18</span>
+            </div>
+        `;
+                grid.appendChild(div);
+
+                setTimeout(() => {
+                    if (chartInstances[cls.code]) chartInstances[cls.code].destroy();
+                    const canvasEl = document.getElementById('chart-' + cls.code);
+                    if (!canvasEl) return;
+                    const ctx = canvasEl.getContext('2d');
+                    chartInstances[cls.code] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: WEEK_LABELS,
+                            datasets: [{
+                                data: dailyRates,
+                                borderColor: color,
+                                backgroundColor: color + '22',
+                                borderWidth: 2.5,
+                                pointRadius: dailyRates.map(r => r !== null ? 4 : 0),
+                                pointBackgroundColor: color,
+                                fill: true,
+                                tension: 0.4,
+                                spanGaps: false,
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: {
+                                    min: 0, max: 100,
+                                    grid: { color: 'rgba(99,102,241,0.07)' },
+                                    ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => v + '%' }
+                                },
+                                x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9ca3af' } },
+                            }
+                        }
+                    });
+                }, 50);
+            });
+        }
+
+        /* ── Class Detail View ── */
+        function openClassDetail(classCode) {
+            teacherData = DB.getTeacherData(session.id);
+            const cls = (teacherData.classes || []).find(c => c.code === classCode);
+            if (!cls) return;
+
+            document.getElementById('classesViewGrid').style.display = 'none';
+            document.getElementById('classDetailView').style.display = 'block';
+
+            // Header
+            const header = document.getElementById('detailHeader');
+            header.innerHTML = `
+                <div class="detail-header-content">
+                    <div>
+                        <span class="ca-code">${cls.code}</span>
+                        <h2 class="detail-class-name">${cls.name}</h2>
+                        <p class="detail-schedule">${cls.schedule || 'No schedule'}</p>
+                    </div>
+                    <div class="detail-actions">
+                        <button class="btn-accent" onclick="openEditClassModal('${cls.code}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Edit Class
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Stats
+            const WEEK_DATES = ['2026-04-12', '2026-04-13', '2026-04-14', '2026-04-15', '2026-04-16', '2026-04-17', '2026-04-18'];
+            let totalPresent = 0, totalAbsent = 0, totalLate = 0, totalExcused = 0;
+            const studentAttMap = {}; // studentId → { name, present, absent, late, excused }
+
+            WEEK_DATES.forEach(date => {
+                const key = `${classCode}_${date}`;
+                const records = (teacherData.sessions || {})[key] || [];
+                records.forEach(r => {
+                    if (!studentAttMap[r.studentId]) {
+                        studentAttMap[r.studentId] = { name: r.name, id: r.studentId, present: 0, absent: 0, late: 0, excused: 0 };
+                    }
+                    const s = studentAttMap[r.studentId];
+                    if (r.status === 'present') { s.present++; totalPresent++; }
+                    else if (r.status === 'absent') { s.absent++; totalAbsent++; }
+                    else if (r.status === 'late') { s.late++; totalLate++; }
+                    else if (r.status === 'excused') { s.excused++; totalExcused++; }
+                });
+            });
+
+            const total = totalPresent + totalAbsent + totalLate + totalExcused;
+            const rate = total > 0 ? Math.round(((totalPresent + totalLate) / total) * 100) : 0;
+
+            document.getElementById('detailStats').innerHTML = `
+                <div class="detail-stat-cards">
+                    <div class="d-stat green"><span class="d-stat-num">${totalPresent}</span><span class="d-stat-label">Present</span></div>
+                    <div class="d-stat red"><span class="d-stat-num">${totalAbsent}</span><span class="d-stat-label">Absent</span></div>
+                    <div class="d-stat orange"><span class="d-stat-num">${totalLate}</span><span class="d-stat-label">Late</span></div>
+                    <div class="d-stat yellow"><span class="d-stat-num">${totalExcused}</span><span class="d-stat-label">Excused</span></div>
+                    <div class="d-stat blue"><span class="d-stat-num">${rate}%</span><span class="d-stat-label">Att. Rate</span></div>
+                </div>
+            `;
+
+            // Student table
+            const students = Object.values(studentAttMap);
+            const tableDiv = document.getElementById('detailStudentTable');
+            if (students.length === 0) {
+                tableDiv.innerHTML = '<p style="padding:24px;text-align:center;opacity:.5">No attendance data for this class yet.</p>';
+            } else {
+                let rows = students.map((s, i) => {
+                    const t = s.present + s.absent + s.late + s.excused || 1;
+                    const r = Math.round(((s.present + s.late) / t) * 100);
+                    return `<tr>
+                        <td class="row-num">${i + 1}</td>
+                        <td class="student-name">${s.name}</td>
+                        <td class="student-id">${s.id}</td>
+                        <td><span class="chip green">${s.present}</span></td>
+                        <td><span class="chip red">${s.absent}</span></td>
+                        <td><span class="chip" style="background:rgba(249,115,22,.12);color:#f97316">${s.late}</span></td>
+                        <td><span class="chip yellow">${s.excused}</span></td>
+                        <td><span class="chip ${r >= 80 ? 'green' : r >= 60 ? 'yellow' : 'red'}">${r}%</span></td>
+                    </tr>`;
+                }).join('');
+
+                tableDiv.innerHTML = `<table class="student-table">
+                    <thead><tr>
+                        <th>#</th><th>Student Name</th><th>ID</th>
+                        <th>Present</th><th>Absent</th><th>Late</th><th>Excused</th><th>Rate</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+            }
+        }
+
+        function closeClassDetail() {
+            document.getElementById('classesViewGrid').style.display = '';
+            document.getElementById('classDetailView').style.display = 'none';
+        }
+
+        /* ── Add / Edit Class Modal ── */
+        function openAddClassModal() {
+            editingClassCode = null;
+            document.getElementById('classModalTitle').textContent = 'Add New Class';
+            document.getElementById('classCode').value = '';
+            document.getElementById('classCode').disabled = false;
+            document.getElementById('className').value = '';
+            document.getElementById('classStartTime').value = '';
+            document.getElementById('classEndTime').value = '';
+            populateStudentPicker([]);
+            document.getElementById('classModal').hidden = false;
+        }
+
+        function openEditClassModal(code) {
+            editingClassCode = code;
+            teacherData = DB.getTeacherData(session.id);
+            const cls = (teacherData.classes || []).find(c => c.code === code);
+            if (!cls) return;
+
+            document.getElementById('classModalTitle').textContent = 'Edit Class — ' + cls.name;
+            document.getElementById('classCode').value = cls.code;
+            document.getElementById('classCode').disabled = true;
+            document.getElementById('className').value = cls.name;
+            document.getElementById('classStartTime').value = cls.scheduleStart || '';
+            document.getElementById('classEndTime').value = cls.scheduleEnd || '';
+            populateStudentPicker(cls.enrolledStudents || []);
+            document.getElementById('classModal').hidden = false;
+        }
+
+        function closeClassModal(e) {
+            if (!e || e.target === document.getElementById('classModal'))
+                document.getElementById('classModal').hidden = true;
+        }
+
+        function populateStudentPicker(selectedIds) {
+            const grouped = DB.getStudentsBySection();
+            const sections = Object.keys(grouped).sort((a, b) => {
+                if (a === 'No Section') return 1;
+                if (b === 'No Section') return -1;
+                return a.localeCompare(b);
+            });
+
+            // Populate section filter
+            const filter = document.getElementById('sectionFilter');
+            filter.innerHTML = '<option value="ALL">All Sections</option>' +
+                sections.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            // Render student list
+            const container = document.getElementById('studentPickerList');
+            container.innerHTML = '';
+
+            sections.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'picker-section';
+                sectionDiv.dataset.section = section;
+                sectionDiv.innerHTML = `<div class="picker-section-header">
+                    <span>${section}</span>
+                    <span class="section-count">${grouped[section].length} students</span>
+                </div>`;
+
+                grouped[section].forEach(student => {
+                    const checked = selectedIds.includes(student.uid);
+                    const item = document.createElement('label');
+                    item.className = 'picker-student' + (checked ? ' checked' : '');
+                    item.dataset.section = section;
+                    item.innerHTML = `
+                        <input type="checkbox" value="${student.uid}" ${checked ? 'checked' : ''} onchange="updatePickerCount()">
+                        <span class="picker-name">${student.lastname}, ${student.firstname}</span>
+                        <span class="picker-uid">${student.uid}</span>
+                    `;
+                    sectionDiv.appendChild(item);
+                });
+
+                container.appendChild(sectionDiv);
+            });
+
+            updatePickerCount();
+        }
+
+        function filterStudentPicker() {
+            const section = document.getElementById('sectionFilter').value;
+            document.querySelectorAll('.picker-section').forEach(el => {
+                el.style.display = (section === 'ALL' || el.dataset.section === section) ? '' : 'none';
+            });
+        }
+
+        function selectAllVisible() {
+            const section = document.getElementById('sectionFilter').value;
+            document.querySelectorAll('.picker-student').forEach(el => {
+                if (section === 'ALL' || el.dataset.section === section) {
+                    const cb = el.querySelector('input[type="checkbox"]');
+                    cb.checked = true;
+                    el.classList.add('checked');
+                }
+            });
+            updatePickerCount();
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.picker-student input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.picker-student').classList.remove('checked');
+            });
+            updatePickerCount();
+        }
+
+        function updatePickerCount() {
+            const count = document.querySelectorAll('.picker-student input:checked').length;
+            document.getElementById('selectedCount').textContent = count + ' selected';
+            // Update visual state
+            document.querySelectorAll('.picker-student').forEach(el => {
+                el.classList.toggle('checked', el.querySelector('input').checked);
+            });
+        }
+
+        function saveClass() {
+            const code = document.getElementById('classCode').value.trim().toUpperCase();
+            const name = document.getElementById('className').value.trim();
+            const startTime = document.getElementById('classStartTime').value;
+            const endTime = document.getElementById('classEndTime').value;
+
+            if (!code || !name) {
+                showToast('⚠ Class code and name are required.');
+                return;
+            }
+
+            // Collect selected students
+            const selectedStudents = [];
+            document.querySelectorAll('.picker-student input:checked').forEach(cb => {
+                selectedStudents.push(cb.value);
+            });
+
+            // Format schedule display
+            let scheduleDisplay = '';
+            if (startTime && endTime) {
+                const fmt = t => {
+                    const [h, m] = t.split(':').map(Number);
+                    const ampm = h >= 12 ? 'PM' : 'AM';
+                    const h12 = h % 12 || 12;
+                    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+                };
+                scheduleDisplay = `${fmt(startTime)} – ${fmt(endTime)}`;
+            }
+
+            teacherData = DB.getTeacherData(session.id);
+            if (!teacherData.classes) teacherData.classes = [];
+
+            if (editingClassCode) {
+                // Edit existing
+                const idx = teacherData.classes.findIndex(c => c.code === editingClassCode);
+                if (idx >= 0) {
+                    teacherData.classes[idx].name = name;
+                    teacherData.classes[idx].schedule = scheduleDisplay;
+                    teacherData.classes[idx].scheduleStart = startTime;
+                    teacherData.classes[idx].scheduleEnd = endTime;
+                    teacherData.classes[idx].enrolledStudents = selectedStudents;
+                    teacherData.classes[idx].enrolled = selectedStudents.length;
+                }
+            } else {
+                // Check for duplicate code
+                if (teacherData.classes.some(c => c.code === code)) {
+                    showToast('⚠ A class with this code already exists.');
+                    return;
+                }
+                teacherData.classes.push({
+                    code,
+                    name,
+                    schedule: scheduleDisplay,
+                    scheduleStart: startTime,
+                    scheduleEnd: endTime,
+                    enrolled: selectedStudents.length,
+                    weekly: [0, 0, 0, 0, 0, 0, 0],
+                    enrolledStudents: selectedStudents,
+                });
+            }
+
+            DB.saveTeacherData(session.id, teacherData);
+            document.getElementById('classModal').hidden = true;
+            populateClassDropdowns();
+            renderClasses();
+            showToast(editingClassCode ? 'Class updated ✓' : 'Class added ✓');
+        }
+
+
+        /* ══════════════════════════════════════════════════════════════
+           GEOLOCATION MAP  (Leaflet + OpenStreetMap/CARTO)
+        ══════════════════════════════════════════════════════════════ */
+        let _leafletMap = null;
+        let _mapMarkers = [];
+
+        const STATUS_COLORS = {
+            present: '#22c55e',
+            late: '#f97316',
+            absent: '#ef4444',
+            excused: '#f59e0b',
+        };
+
+        function initAttendanceMap() {
+            if (_leafletMap) return;
+            _leafletMap = L.map('attendanceMap', { zoomControl: true })
+                .setView([14.5995, 120.9842], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(_leafletMap);
+        }
+
+        function updateAttendanceMap(students) {
+            initAttendanceMap();
+            _mapMarkers.forEach(m => _leafletMap.removeLayer(m));
+            _mapMarkers = [];
+
+            const located = students.filter(s => s.location && s.location.lat);
+            document.getElementById('mapLocCount').textContent = located.length + ' located';
+
+            if (!located.length) return;
+
+            const bounds = [];
+            located.forEach(s => {
+                const color = STATUS_COLORS[s.status] || '#6366f1';
+                const initials = (s.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+                const iconHtml = `<div class="map-pin" style="background:${color}" title="${s.name}"><span>${initials}</span></div>`;
+                const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [34, 34], iconAnchor: [17, 34] });
+
+                const popup = `<div class="map-popup">
+                    <strong>${s.name}</strong>
+                    <span class="mp-status mp-${s.status}">${s.status}</span>
+                    <span>Time In: ${s.timeIn || '—'}</span>
+                    <span>ID: ${s.studentId}</span>
+                </div>`;
+
+                const marker = L.marker([s.location.lat, s.location.lng], { icon })
+                    .bindPopup(popup, { minWidth: 160 });
+                marker.addTo(_leafletMap);
+                _mapMarkers.push(marker);
+                bounds.push([s.location.lat, s.location.lng]);
+            });
+
+            if (bounds.length === 1) {
+                _leafletMap.setView(bounds[0], 16);
+            } else {
+                _leafletMap.fitBounds(bounds, { padding: [30, 30] });
+            }
+            setTimeout(() => _leafletMap.invalidateSize(), 100);
+        }
+
+        /* ──────────────────────────────────────────────────────────────
+           GUARDIAN MESSENGER NOTIFICATIONS
+        ────────────────────────────────────────────────────────────── */
+        const CLASS_NAMES_MAP = { ENG: 'English', AP: 'Araling Panlipunan', MATH: 'Mathematics', SCI: 'Science' };
+        const MCP_URL = 'https://attendease-server.onrender.com';
+
+        async function notifyGuardian(idx) {
+            const s = currentSessionStudents[idx];
+            const btn = document.getElementById('notify-btn-' + idx);
+            if (!btn) return;
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+            btn.className = 'notify-btn sending';
+            try {
+                const res = await fetch(MCP_URL + '/api/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentId: s.studentId,
+                        studentName: s.name,
+                        status: s.status,
+                        className: CLASS_NAMES_MAP[currentClassCode] || currentClassCode,
+                        date: currentDate,
+                        remark: s.remark || ''
+                    })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    btn.textContent = '📩 Sent';
+                    btn.className = 'notify-btn sent';
+                    showToast('📩 ' + data.message);
+                } else {
+                    btn.textContent = '⚠️ No PSID';
+                    btn.className = 'notify-btn failed';
+                    showToast('⚠️ ' + data.message);
+                    setTimeout(() => { btn.disabled = false; btn.textContent = '📩 Notify'; btn.className = 'notify-btn'; }, 4000);
+                }
+            } catch (err) {
+                btn.textContent = '⚠️ Offline';
+                btn.className = 'notify-btn failed';
+                showToast('⚠️ Server offline — run: npm start  in the messenger-mcp folder');
+                setTimeout(() => { btn.disabled = false; btn.textContent = '📩 Notify'; btn.className = 'notify-btn'; }, 4000);
+            }
+        }
+
+        async function notifyAllAbsent() {
+            const targets = currentSessionStudents.filter(s => s.status === 'absent' || s.status === 'late');
+            if (!targets.length) { showToast('No absent or late students to notify.'); return; }
+            showToast('📩 Sending ' + targets.length + ' notification(s)…');
+            for (const s of targets) {
+                const idx = currentSessionStudents.indexOf(s);
+                await notifyGuardian(idx);
+            }
+        }
+        /* ══════════════════════════════════════════════════════════════
+           TOAST
+        ══════════════════════════════════════════════════════════════ */
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function signOut() {
+            DB.clearSession();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>
