@@ -71,6 +71,7 @@ Storage.prototype.setItem = function (key, value) {
     originalSetItem.call(this, key, value);
 
     if (key.startsWith('attendease_')) {
+        window.__cloudSyncDirty = true;
         clearTimeout(syncTimer);
         syncTimer = setTimeout(async () => {
             const state = {};
@@ -94,6 +95,8 @@ Storage.prototype.setItem = function (key, value) {
                 console.log('[CloudSync] State pushed to Neon db');
             } catch (err) {
                 console.warn('[CloudSync] Failed to push state', err);
+            } finally {
+                window.__cloudSyncDirty = false;
             }
         }, DEBOUNCE_MS);
     }
@@ -101,6 +104,7 @@ Storage.prototype.setItem = function (key, value) {
 
 // ── 2. Initial hydration — pull cloud state before app boots ─────────────────
 window.initCloudDb = async function () {
+    if (window.__cloudSyncDirty) return; // Skip pulling if we have active pending local saves
     try {
         const res = await fetch(SYNC_URL);
         const data = await res.json();

@@ -199,7 +199,7 @@
                     </button>
                     <button class="btn-notify-all" onclick="notifyAllAbsent()"
                         title="Send Messenger notification to all absent &amp; late guardians">
-                        📩 Notify All Absent
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Notify All Absent
                     </button>
                 </div>
 
@@ -232,7 +232,7 @@
                     <div class="att-map-panel">
                         <div class="map-card">
                             <div class="map-header">
-                                <span>&#128205; Student Locations</span>
+                                <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Student Locations</span>
                                 <span class="map-count" id="mapLocCount">0 located</span>
                             </div>
                             <div id="attendanceMap"></div>
@@ -311,7 +311,7 @@
             <section class="page" id="page-news">
                 <!-- Post announcement card -->
                 <div class="card news-compose">
-                    <h3 class="card-title">📢 Post Announcement</h3>
+                    <h3 class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Post Announcement</h3>
                     <div class="form-group">
                         <label>Choose Class</label>
                         <div class="news-class-pills" id="newsClassPills"></div>
@@ -751,8 +751,12 @@
         }
 
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('mainWrap').classList.toggle('shifted');
+            if (window.innerWidth > 900) {
+                document.body.classList.toggle('sidebar-collapsed');
+            } else {
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('mainWrap').classList.toggle('shifted');
+            }
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -770,7 +774,7 @@
 
             const sched = DB.schedules[currentClassCode];
             const badge = document.getElementById('schedBadge');
-            if (badge) badge.textContent = sched ? `🕒 Schedule: ${sched.display}` : '';
+            if (badge) badge.innerHTML = sched ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Schedule: ${sched.display}` : '';
 
             const key = `${currentClassCode}_${currentDate}`;
             const savedRecords = teacherData.sessions[key]
@@ -854,7 +858,7 @@
                         : `<span class="no-action">—</span>`}
             </td>
             <td><input class="remark-input" type="text" placeholder="Add note..." value="${s.remark || ''}" onchange="setRemark(${realIdx}, this.value)"></td>
-            <td>${(s.status === 'absent' || s.status === 'late') ? `<button class="notify-btn" id="notify-btn-${realIdx}" onclick="notifyGuardian(${realIdx})">📩 Notify</button>` : ''}</td>
+            <td>${(s.status === 'absent' || s.status === 'late') ? `<button class="notify-btn" id="notify-btn-${realIdx}" onclick="notifyGuardian(${realIdx})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Notify</button>` : ''}</td>
         </tr>`;
             });
             updateStats();
@@ -1189,7 +1193,7 @@
             const teacherFullName = `${session.firstname} ${session.lastname}`.trim();
             enrolledStudents.forEach(studentId => {
                 pushStudentNotification(studentId, {
-                    icon: '📢',
+                    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>',
                     title: `New announcement in ${className}`,
                     body: `${teacherFullName} posted a new announcement`,
                 });
@@ -1999,27 +2003,27 @@
                 });
                 const data = await res.json();
                 if (data.ok) {
-                    btn.textContent = '📩 Sent';
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Sent';
                     btn.className = 'notify-btn sent';
-                    showToast('📩 ' + data.message);
+                    showToast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> ' + data.message);
                 } else {
                     btn.textContent = '⚠️ No PSID';
                     btn.className = 'notify-btn failed';
                     showToast('⚠️ ' + data.message);
-                    setTimeout(() => { btn.disabled = false; btn.textContent = '📩 Notify'; btn.className = 'notify-btn'; }, 4000);
+                    setTimeout(() => { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Notify'; btn.className = 'notify-btn'; }, 4000);
                 }
             } catch (err) {
                 btn.textContent = '⚠️ Offline';
                 btn.className = 'notify-btn failed';
                 showToast('⚠️ Server offline — run: npm start  in the messenger-mcp folder');
-                setTimeout(() => { btn.disabled = false; btn.textContent = '📩 Notify'; btn.className = 'notify-btn'; }, 4000);
+                setTimeout(() => { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Notify'; btn.className = 'notify-btn'; }, 4000);
             }
         }
 
         async function notifyAllAbsent() {
             const targets = currentSessionStudents.filter(s => s.status === 'absent' || s.status === 'late');
             if (!targets.length) { showToast('No absent or late students to notify.'); return; }
-            showToast('📩 Sending ' + targets.length + ' notification(s)…');
+            showToast('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Sending ' + targets.length + ' notification(s)…');
             for (const s of targets) {
                 const idx = currentSessionStudents.indexOf(s);
                 await notifyGuardian(idx);
@@ -2097,7 +2101,7 @@
 
             const grid = document.getElementById('excuseCardsGrid');
             if (!filtered.length) {
-                grid.innerHTML = `<div class="excuse-empty-state"><div style="font-size:42px">📩</div><p>No excuse letters ${excuseClassFilter !== 'ALL' ? 'for this class' : 'submitted yet'}</p><span>Letters will appear here once students upload them</span></div>`;
+                grid.innerHTML = `<div class="excuse-empty-state"><div style="font-size:42px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><p>No excuse letters ${excuseClassFilter !== 'ALL' ? 'for this class' : 'submitted yet'}</p><span>Letters will appear here once students upload them</span></div>`;
                 return;
             }
 

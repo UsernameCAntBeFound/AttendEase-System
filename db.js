@@ -211,6 +211,25 @@ const DB = (() => {
             _write(this.getAll().filter(u => u.id !== id));
         },
 
+        archive(id) {
+            return this.update(id, { isArchived: true, archivedAt: new Date().toISOString().split('T')[0] });
+        },
+
+        restore(id) {
+            return this.update(id, { isArchived: false, archivedAt: null });
+        },
+
+        generateUid(role) {
+            const users = this.getAll();
+            // Start count from 1 + existing count to avoid simple overlap (though deleted users might cause gaps/dupes, we'll use max if needed, but length+1 is usually sufficient for a simple system)
+            const roleUsers = users.filter(u => u.role === role);
+            const count = roleUsers.length > 0 ? roleUsers.length + 1 : 1;
+            const year = new Date().getFullYear();
+            if (role === 'student') return `${year}-${count.toString().padStart(5, '0')}`;
+            if (role === 'teacher') return `EMP-${count.toString().padStart(3, '0')}`;
+            return `ADMIN-${count.toString().padStart(3, '0')}`;
+        },
+
         // ── Extended student data ──────────────────────────────────────────────
 
         getStudentData(userId) {

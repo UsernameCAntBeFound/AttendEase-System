@@ -12,20 +12,20 @@
 }
 
 :root {
-    --bg: linear-gradient(145deg, #ffffff 0%, #eef2ff 40%, #e0ecff 75%, #f0f7ff 100%);
-    --brand: #4b78e5;
-    --brand-dark: #3b5ec2;
-    --brand-gradient: linear-gradient(135deg, #3b5ec2 0%, #6366f1 100%);
-    --surface: rgba(255, 255, 255, 0.82);
-    --border: rgba(99, 102, 241, 0.11);
-    --text: #111827;
-    --text-muted: #6b7280;
+    --bg: #f3efe9;
+    --brand: #2d2f33;
+    --brand-dark: #1a1b1f;
+    --brand-gradient: linear-gradient(135deg, #2d2f33 0%, #1a1b1f 100%);
+    --surface: #ffffff;
+    --border: rgba(0, 0, 0, 0.06);
+    --text: #2d2f33;
+    --text-muted: #8c8884;
     --sidebar-w: 240px;
     --top-h: 58px;
-    --radius: 14px;
+    --radius: 20px;
     --green: #22c55e;
     --red: #ef4444;
-    --yellow: #f59e0b;
+    --yellow: #fed600;
     --blue: #4b78e5;
 }
 
@@ -257,7 +257,7 @@ body {
 }
 
 .hamburger {
-    display: none;
+    display: flex;
     flex-direction: column;
     gap: 5px;
     background: none;
@@ -346,6 +346,7 @@ body {
     gap: 18px;
     animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
     min-height: 0;
+    width: 100%;
 }
 
 .page.active {
@@ -1227,6 +1228,48 @@ input:focus {
 .toast.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+}
+
+/* ─── SIDEBAR COLLAPSED STATE ─────────────────────────── */
+body.sidebar-collapsed {
+    --sidebar-w: 80px;
+}
+body.sidebar-collapsed .sidebar {
+}
+body.sidebar-collapsed .brand {
+    display: none;
+}
+body.sidebar-collapsed .teacher-info {
+    justify-content: center;
+    padding: 16px 0;
+}
+body.sidebar-collapsed .t-avatar-wrap {
+    margin: 0 auto;
+}
+body.sidebar-collapsed .t-name,
+body.sidebar-collapsed .t-role {
+    display: none;
+}
+body.sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding: 12px;
+    font-size: 0;
+}
+body.sidebar-collapsed .nav-item svg {
+    margin: 0;
+}
+body.sidebar-collapsed .sign-out-btn {
+    justify-content: center;
+    padding: 12px;
+    font-size: 0;
+    margin: 0 auto;
+    width: calc(100% - 24px);
+}
+body.sidebar-collapsed .sign-out-btn svg {
+    margin: 0;
+}
+body.sidebar-collapsed .hamburger span {
+    width: 20px;
 }
 
 /* ─── RESPONSIVE ───────────────────────────── */

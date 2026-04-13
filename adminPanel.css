@@ -12,18 +12,18 @@
 }
 
 :root {
-    --bg: linear-gradient(145deg, #f8f7ff 0%, #eef2ff 40%, #e0ecff 75%, #f0f7ff 100%);
-    --brand: #7c3aed;
-    --brand-light: #8b5cf6;
-    --brand-dark: #6d28d9;
-    --brand-gradient: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 60%, #a78bfa 100%);
-    --surface: rgba(255, 255, 255, 0.85);
-    --border: rgba(124, 58, 237, 0.1);
-    --text: #111827;
-    --text-muted: #6b7280;
+    --bg: #f3efe9;
+    --brand: #2d2f33;
+    --brand-light: #52565e;
+    --brand-dark: #1a1b1f;
+    --brand-gradient: linear-gradient(135deg, #2d2f33 0%, #1a1b1f 100%);
+    --surface: #ffffff;
+    --border: rgba(0, 0, 0, 0.06);
+    --text: #2d2f33;
+    --text-muted: #8c8884;
     --sidebar-w: 248px;
     --top-h: 58px;
-    --radius: 14px;
+    --radius: 20px;
     --green: #22c55e;
     --red: #ef4444;
     --amber: #f59e0b;
@@ -334,6 +334,7 @@ body {
     flex-direction: column;
     gap: 20px;
     animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    width: 100%;
 }
 
 .page.active {
@@ -530,11 +531,13 @@ body {
 
 .quick-actions {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
 .quick-btn {
+    flex: 1;
+    min-width: 140px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1206,8 +1209,49 @@ input:focus {
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s;
     opacity: 0;
     pointer-events: none;
-    z-index: 2000;
-    white-space: nowrap;
+}
+
+/* ─── SIDEBAR COLLAPSED STATE ─────────────────────────── */
+body.sidebar-collapsed {
+    --sidebar-w: 80px;
+}
+body.sidebar-collapsed .sidebar {
+}
+body.sidebar-collapsed .brand {
+    display: none;
+}
+body.sidebar-collapsed .admin-info {
+    justify-content: center;
+    padding: 16px 0;
+}
+body.sidebar-collapsed .a-avatar-wrap {
+    margin: 0 auto;
+}
+body.sidebar-collapsed .a-name,
+body.sidebar-collapsed .a-role {
+    display: none;
+}
+body.sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding: 12px;
+    font-size: 0;
+}
+body.sidebar-collapsed .nav-item svg {
+    margin: 0;
+}
+body.sidebar-collapsed .sign-out-btn {
+    justify-content: center;
+    padding: 12px;
+    font-size: 0;
+    margin: 0 auto;
+    width: calc(100% - 24px);
+}
+body.sidebar-collapsed .sign-out-btn svg {
+    margin: 0;
+}
+body.sidebar-collapsed .hamburger-desktop rect {
+    x: 14; 
+    width: 7;
 }
 
 .toast.show {
