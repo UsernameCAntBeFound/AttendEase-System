@@ -1161,6 +1161,17 @@
             teacherData = DB.getTeacherData(session.id);
             if (!teacherData.announcements) teacherData.announcements = [];
 
+            // ── Prevent accidental double-post via rapid button clicks ────────
+            const postBtn = document.querySelector('[onclick*="postAnnouncement"]');
+            if (postBtn) {
+                if (postBtn.dataset.posting === '1') return;
+                postBtn.dataset.posting = '1';
+                const origHTML = postBtn.innerHTML;
+                postBtn.innerHTML = '⏳ Posting…';
+                postBtn.disabled = true;
+                setTimeout(() => { postBtn.dataset.posting = ''; postBtn.innerHTML = origHTML; postBtn.disabled = false; }, 3000);
+            }
+
             teacherData.announcements.unshift({
                 id: Date.now(),
                 classCode: selectedNewsClass,
@@ -1960,6 +1971,18 @@
             btn.disabled = true;
             btn.textContent = '⏳ Sending...';
             btn.className = 'notify-btn sending';
+
+            // Try to look up the student's saved guardian FB link from DB
+            let guardianContact = '';
+            try {
+                const allUsers = DB.getAll();
+                const studentUser = allUsers.find(u => u.role === 'student' && u.uid === s.studentId);
+                if (studentUser) {
+                    const sd = DB.getStudentData(studentUser.id);
+                    guardianContact = sd.guardianFbLink || '';
+                }
+            } catch (_) {}
+
             try {
                 const res = await fetch(MCP_URL + '/api/notify', {
                     method: 'POST',
@@ -1970,7 +1993,8 @@
                         status: s.status,
                         className: CLASS_NAMES_MAP[currentClassCode] || currentClassCode,
                         date: currentDate,
-                        remark: s.remark || ''
+                        remark: s.remark || '',
+                        guardianContact   // pass FB link so MCP can register it if no PSID yet
                     })
                 });
                 const data = await res.json();

@@ -217,6 +217,44 @@
                     <span class="info-label">Section</span>
                     <span class="info-value" id="profileSection">—</span>
                 </div>
+
+                <!-- ── Guardian Messenger Contact ── -->
+                <div class="info-item guardian-item" id="guardianDisplayRow">
+                    <div class="guardian-label-wrap">
+                        <span class="info-label">Guardian Messenger</span>
+                    </div>
+                    <div class="guardian-value-wrap">
+                        <span class="info-value" id="guardianDisplay">—</span>
+                        <button class="guardian-edit-btn" onclick="openGuardianEdit()" title="Edit guardian link">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Guardian Edit Row (inline) ── -->
+                <div class="info-item guardian-edit-row" id="guardianEditRow" style="display:none; flex-direction:column; gap:10px;">
+                    <label class="info-label" style="margin-bottom:2px;">
+                        Guardian's Facebook Messenger Link
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2" style="vertical-align:middle;margin-left:4px;" title="Used by teacher to send Messenger notifications">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                    </label>
+                    <input class="guardian-input" id="guardianInput" type="url"
+                        placeholder="https://m.me/guardianusername or Facebook profile URL"
+                        autocomplete="off" />
+                    <p class="guardian-hint">
+                        📘 Paste your guardian's <strong>m.me/</strong> link or Facebook profile URL. The teacher will use this to send Messenger notifications when you are absent or late.
+                        <br>Your guardian can also self-register by messaging the school's Facebook Page:<br>
+                        <code id="guardianRegisterHint" style="font-size:11px;color:var(--brand);"></code>
+                    </p>
+                    <div class="guardian-actions">
+                        <button class="guardian-cancel-btn" onclick="closeGuardianEdit()">Cancel</button>
+                        <button class="guardian-save-btn" onclick="saveGuardianLink()">Save Link</button>
+                    </div>
+                </div>
             </div>
 
             <div class="attendance-summary" id="attendanceSummary">
@@ -444,9 +482,54 @@
             document.getElementById('attAbsent').textContent = att.absent;
             document.getElementById('attLate').textContent = att.late;
 
+            // Load guardian messenger link
+            loadGuardianLink(extraData);
+
             // Animate the summary cards on refresh
             animateSummaryCards();
             // All Classes data is loaded on-demand when the accordion is opened
+        }
+
+        /* ── GUARDIAN MESSENGER LINK ── */
+        function loadGuardianLink(extraData) {
+            const link = extraData.guardianFbLink || '';
+            const display = document.getElementById('guardianDisplay');
+            const hint = document.getElementById('guardianRegisterHint');
+            if (hint) hint.textContent = `REGISTER ${session.uid}`;
+            if (link) {
+                // Show as a short clickable label
+                let label = link.replace(/^https?:\/\//i, '');
+                if (label.length > 32) label = label.slice(0, 30) + '…';
+                display.innerHTML = `<a class="guardian-link" href="${link}" target="_blank" rel="noopener">${label}</a>`;
+            } else {
+                display.textContent = 'Not set';
+            }
+        }
+
+        function openGuardianEdit() {
+            const extraData = DB.getStudentData(session.id);
+            document.getElementById('guardianInput').value = extraData.guardianFbLink || '';
+            document.getElementById('guardianDisplayRow').style.display = 'none';
+            document.getElementById('guardianEditRow').style.display = 'flex';
+        }
+
+        function closeGuardianEdit() {
+            document.getElementById('guardianEditRow').style.display = 'none';
+            document.getElementById('guardianDisplayRow').style.display = '';
+        }
+
+        function saveGuardianLink() {
+            const val = document.getElementById('guardianInput').value.trim();
+            try {
+                const sd = DB.getStudentData(session.id);
+                sd.guardianFbLink = val;
+                DB.saveStudentData(session.id, sd);
+                loadGuardianLink(sd);
+                closeGuardianEdit();
+                showToast(val ? '✅ Guardian link saved!' : 'Guardian link cleared.');
+            } catch (e) {
+                showToast('Could not save — storage may be full.');
+            }
         }
 
         /** Add a brief pop animation to the summary numbers on refresh */
