@@ -92,6 +92,19 @@ body {
     gap: 12px;
     padding: 16px 20px;
     border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.admin-info:hover {
+    background: rgba(124, 58, 237, 0.04);
+}
+
+.a-avatar-wrap {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
 }
 
 .a-avatar {
@@ -107,6 +120,37 @@ body {
     font-weight: 700;
     flex-shrink: 0;
 }
+
+/* Profile photo in sidebar */
+.a-avatar-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    display: block;
+}
+
+/* Camera icon overlay on sidebar avatar */
+.a-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.40);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.admin-info:hover .a-avatar-overlay {
+    opacity: 1;
+}
+
 
 .a-name {
     font-size: 14px;
@@ -1209,4 +1253,187 @@ input:focus {
     .preview-card {
         position: static;
     }
+}
+
+/* ─── ADMIN PROFILE MODAL ──────────────────────────── */
+.admin-profile-modal-box {
+    max-width: 400px;
+    width: 92%;
+}
+
+.admin-profile-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 0 20px;
+}
+
+/* Large avatar ring in the modal */
+.a-profile-avatar-ring {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    padding: 3px;
+    background: var(--brand-gradient);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+.a-profile-avatar-initials {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--brand-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+}
+
+.a-profile-avatar-photo {
+    position: absolute;
+    inset: 3px;
+    width: calc(100% - 6px);
+    height: calc(100% - 6px);
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.a-profile-avatar-overlay {
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.a-profile-avatar-ring:hover .a-profile-avatar-overlay {
+    opacity: 1;
+}
+
+.a-profile-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.a-profile-role-badge {
+    font-size: 12px;
+    color: var(--brand);
+    background: rgba(124, 58, 237, 0.1);
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: 500;
+}
+
+/* Profile action buttons */
+.profile-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2px;
+}
+
+.edit-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(124, 58, 237, 0.3);
+    background: rgba(124, 58, 237, 0.07);
+    color: var(--brand);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.edit-profile-btn:hover {
+    background: rgba(124, 58, 237, 0.14);
+    border-color: rgba(124, 58, 237, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+.remove-photo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(239, 68, 68, 0.28);
+    background: rgba(239, 68, 68, 0.06);
+    color: var(--red);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.remove-photo-btn:hover {
+    background: rgba(239, 68, 68, 0.13);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+/* Info list in admin profile modal */
+.a-profile-info-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 0 20px 8px;
+}
+
+.a-profile-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+
+.a-profile-info-item:last-child {
+    border-bottom: none;
+}
+
+.a-profile-info-item:hover {
+    background: rgba(124, 58, 237, 0.03);
+}
+
+.a-profile-info-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.a-profile-info-value {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    word-break: break-all;
+    max-width: 60%;
 }

@@ -33,13 +33,25 @@
             </button>
         </div>
 
-        <div class="teacher-info">
-            <div class="t-avatar">MS</div>
+        <div class="teacher-info" id="teacherInfoSection" onclick="openTeacherProfileModal()" title="Edit Profile">
+            <div class="t-avatar-wrap" id="tAvatarWrap">
+                <div class="t-avatar" id="tAvatar">MS</div>
+                <img id="tAvatarImg" class="t-avatar-photo" hidden>
+                <div class="t-avatar-overlay">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="13" r="4" />
+                    </svg>
+                </div>
+            </div>
             <div>
-                <div class="t-name">Ms. Santos</div>
+                <div class="t-name" id="tName">Ms. Santos</div>
                 <div class="t-role">Teacher</div>
             </div>
         </div>
+        <input type="file" id="teacherProfilePicInput" accept="image/*" hidden
+            onchange="handleTeacherProfilePicUpload(event)">
 
         <nav class="sidebar-nav">
             <button class="nav-item" onclick="navigate('attendance')" id="nav-attendance">
@@ -91,6 +103,7 @@
                 </svg>
                 Classes
             </button>
+
         </nav>
 
         <button class="sign-out-btn" onclick="signOut()">
@@ -124,13 +137,17 @@
                     </svg>
                     <input type="text" placeholder="Search students…" id="searchInput" oninput="filterStudents()">
                 </div>
-                <button class="icon-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                </button>
+                <!-- Notification bell -->
+                <div class="notif-wrapper" id="notifWrapper">
+                    <button class="icon-btn notif-btn" id="notifBtn" onclick="toggleNotifPanel()" title="Notifications">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span class="notif-badge" id="notifBadge" hidden>0</span>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -428,14 +445,16 @@
                 </div>
             </section>
 
+
+
         </main>
     </div>
 
-    <!-- ═══ EXCUSE MODAL ═══ -->
+    <!-- ═══ EXCUSE LETTER VIEWER MODAL ═══ -->
     <div class="modal-overlay" id="excuseModal" hidden onclick="closeExcuseModal(event)">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3>Attach Excuse Letter</h3>
+                <h3>Student Excuse Letter</h3>
                 <button class="modal-close" onclick="closeExcuseModal()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -445,23 +464,46 @@
                 </button>
             </div>
             <p class="modal-student" id="modalStudentName"></p>
-            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('excuseFile').click()">
-                <input type="file" id="excuseFile" accept="image/*,.pdf" hidden onchange="previewExcuse(event)">
-                <div id="uploadPrompt">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    <p><strong>Click to upload</strong> or drag & drop</p>
-                    <span>PNG, JPG, PDF up to 10MB</span>
-                </div>
-                <img id="excusePreview" hidden style="max-width:100%;max-height:200px;border-radius:8px;">
+
+            <!-- Image viewer -->
+            <div id="excuseViewImgWrap" hidden style="text-align:center;padding:8px 0">
+                <img id="excuseViewImg"
+                    style="max-width:100%;max-height:300px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.3);cursor:zoom-in"
+                    onclick="openFullExcuseImage()" title="Click to view full size">
+                <p style="font-size:11px;opacity:.5;margin-top:6px">Click image to view full size</p>
             </div>
+
+            <!-- PDF viewer chip -->
+            <div id="excuseViewPdfWrap" hidden
+                style="display:flex;align-items:center;gap:12px;padding:18px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);border-radius:12px;cursor:pointer"
+                onclick="downloadCurrentExcuse()">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand);flex-shrink:0">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                <div style="flex:1;min-width:0">
+                    <div id="excuseViewPdfName"
+                        style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                    </div>
+                    <div style="font-size:12px;opacity:.6;margin-top:3px">Click to download PDF</div>
+                </div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="opacity:.5;flex-shrink:0">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+            </div>
+
+            <!-- Submission timestamp -->
+            <div id="excuseViewMeta" style="font-size:11px;opacity:.5;margin-top:10px;text-align:center"></div>
+
             <div class="modal-actions">
-                <button class="btn-ghost" onclick="closeExcuseModal()">Cancel</button>
-                <button class="btn-primary" onclick="saveExcuse()">Save & Mark Excused</button>
+                <button class="btn-ghost" onclick="closeExcuseModal()">Close</button>
+                <button class="btn-primary" onclick="markExcused()">Save &amp; Mark Excused</button>
             </div>
         </div>
     </div>
@@ -527,8 +569,87 @@
         </div>
     </div>
 
+    <!-- ═══ TEACHER PROFILE MODAL ═══ -->
+    <div class="modal-overlay" id="teacherProfileModal" hidden onclick="closeTeacherProfileModal(event)">
+        <div class="modal-box teacher-profile-modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>My Profile</h3>
+                <button class="modal-close" onclick="closeTeacherProfileModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="teacher-profile-content">
+                <!-- Clickable avatar -->
+                <div class="t-profile-avatar-ring" id="tProfileAvatarRing"
+                    onclick="document.getElementById('teacherProfilePicInput').click()" title="Change profile picture">
+                    <div class="t-profile-avatar-initials" id="tProfileAvatarInitials">MS</div>
+                    <img id="tProfileAvatarImg" class="t-profile-avatar-photo" hidden>
+                    <div class="t-profile-avatar-overlay">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                            <circle cx="12" cy="13" r="4" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="t-profile-name" id="tProfileName">Ms. Santos</h2>
+                <p class="t-profile-role-badge">Teacher</p>
+                <div class="profile-actions">
+                    <button class="edit-profile-btn"
+                        onclick="document.getElementById('teacherProfilePicInput').click()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Edit Profile
+                    </button>
+                    <button class="remove-photo-btn" id="tRemovePhotoBtn" onclick="removeTeacherProfilePic()" hidden>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                        </svg>
+                        Remove Photo
+                    </button>
+                </div>
+            </div>
+            <div class="t-profile-info-list">
+                <div class="t-profile-info-item">
+                    <span class="t-profile-info-label">Employee ID</span>
+                    <span class="t-profile-info-value" id="tProfileId">—</span>
+                </div>
+                <div class="t-profile-info-item">
+                    <span class="t-profile-info-label">Email</span>
+                    <span class="t-profile-info-value" id="tProfileEmail">—</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-ghost" onclick="closeTeacherProfileModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══ TOAST ═══ -->
     <div class="toast" id="toast"></div>
+
+    <!-- ═══ NOTIFICATION PANEL (body-level to escape all stacking contexts) ═══ -->
+    <div class="notif-panel" id="notifPanel" hidden>
+        <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <button class="notif-clear-btn" onclick="clearAllNotifs()" title="Clear all">Clear all</button>
+        </div>
+        <div class="notif-list" id="notifList">
+            <div class="notif-empty">No notifications yet</div>
+        </div>
+    </div>
 
     <script>
         /* ══════════════════════════════════════════════════════════════
@@ -562,10 +683,11 @@
             await window.initCloudDb();
             const fullName = `${session.firstname} ${session.lastname}`.trim();
             const initials = (session.firstname[0] + (session.lastname[0] || '')).toUpperCase();
-            const el = document.querySelector('.t-name');
-            const av = document.querySelector('.t-avatar');
+            const el = document.getElementById('tName');
+            const av = document.getElementById('tAvatar');
             if (el) el.textContent = fullName;
             if (av) av.textContent = initials;
+            loadTeacherProfilePic();
 
             const today = new Date().toISOString().slice(0, 10);
             const defDate = (today >= '2026-04-12' && today <= '2026-04-18') ? today : '2026-04-12';
@@ -623,6 +745,7 @@
             if (page === 'attendance') { loadAttendanceSession(); }
             if (page === 'classes') { teacherData = DB.getTeacherData(session.id); renderClasses(); closeClassDetail(); }
             if (page === 'news') { renderNewsFeed(); renderNewsClassPills(); }
+
             // Persist last-visited tab so refresh stays on same page
             sessionStorage.setItem('teacher_last_page', page);
         }
@@ -661,14 +784,18 @@
                 .filter(u => u.role === 'student')
                 .forEach(student => {
                     if (!recordMap[student.uid]) {
+                        // Student has no QR scan record — check if they submitted an excuse
+                        const dbRecord = (teacherData.sessions[key] || []).find(r => r.studentId === student.uid);
                         savedRecords.push({
                             studentId: student.uid,
                             name: `${student.firstname} ${student.lastname}`.trim(),
-                            status: 'absent',
+                            status: dbRecord ? dbRecord.status : 'absent',
                             timeIn: null,
                             timeOut: null,
                             remark: '',
-                            excuse: null,
+                            excuse: dbRecord ? dbRecord.excuse || null : null,
+                            excuseFileName: dbRecord ? dbRecord.excuseFileName || '' : '',
+                            excuseSubmittedAt: dbRecord ? dbRecord.excuseSubmittedAt || '' : '',
                         });
                     }
                 });
@@ -719,11 +846,12 @@
                 </div>
             </td>
             <td>
-                ${s.status === 'excused' ? `
-                    <button class="attach-btn ${s.excuse ? 'has-file' : ''}" onclick="openExcuseModal(${realIdx})">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                        ${s.excuse ? 'View/Change' : 'Attach'}
-                    </button>` : ''}
+                ${s.excuse
+                        ? `<button class="attach-btn has-file" onclick="openExcuseModal(${realIdx})" title="View submitted excuse letter">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        \ud83d\udcc4 View
+                    </button>`
+                        : `<span class="no-action">—</span>`}
             </td>
             <td><input class="remark-input" type="text" placeholder="Add note..." value="${s.remark || ''}" onchange="setRemark(${realIdx}, this.value)"></td>
             <td>${(s.status === 'absent' || s.status === 'late') ? `<button class="notify-btn" id="notify-btn-${realIdx}" onclick="notifyGuardian(${realIdx})">📩 Notify</button>` : ''}</td>
@@ -736,7 +864,11 @@
 
         function setStatus(idx, status) {
             currentSessionStudents[idx].status = status;
-            if (status !== 'excused') currentSessionStudents[idx].excuse = null;
+            // Only clear the excuse if there is no student-submitted letter attached.
+            // Student-submitted letters have excuseSubmittedAt set; teacher-attached ones do not.
+            if (status !== 'excused' && !currentSessionStudents[idx].excuseSubmittedAt) {
+                currentSessionStudents[idx].excuse = null;
+            }
             allPresentState = false;
             updateMarkAllBtn();
             saveAttendanceSession();
@@ -834,63 +966,71 @@
         }
 
         /* ══════════════════════════════════════════════════════════════
-           EXCUSE MODAL
+           EXCUSE LETTER VIEWER
         ══════════════════════════════════════════════════════════════ */
         function openExcuseModal(idx) {
+            const student = currentSessionStudents[idx];
+            if (!student || !student.excuse) return; // no letter submitted — button shouldn't appear
             currentExcuseIndex = idx;
-            document.getElementById('modalStudentName').textContent = '📎 ' + currentSessionStudents[idx].name;
-            const preview = document.getElementById('excusePreview');
-            const prompt = document.getElementById('uploadPrompt');
-            if (currentSessionStudents[idx].excuse) {
-                preview.src = currentSessionStudents[idx].excuse;
-                preview.hidden = false;
-                prompt.hidden = true;
+
+            // Student name
+            document.getElementById('modalStudentName').textContent = '\ud83d\udcce ' + student.name;
+
+            // Show image or PDF chip
+            const imgWrap = document.getElementById('excuseViewImgWrap');
+            const pdfWrap = document.getElementById('excuseViewPdfWrap');
+            const isImage = student.excuse.startsWith('data:image/');
+
+            if (isImage) {
+                document.getElementById('excuseViewImg').src = student.excuse;
+                imgWrap.hidden = false;
+                pdfWrap.hidden = true;
             } else {
-                preview.hidden = true;
-                prompt.hidden = false;
+                document.getElementById('excuseViewPdfName').textContent =
+                    student.excuseFileName || 'excuse_letter.pdf';
+                imgWrap.hidden = true;
+                pdfWrap.hidden = false;
             }
+
+            // Submission timestamp
+            const meta = document.getElementById('excuseViewMeta');
+            meta.textContent = student.excuseSubmittedAt
+                ? 'Submitted: ' + new Date(student.excuseSubmittedAt).toLocaleString('en-US',
+                    { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '';
+
             document.getElementById('excuseModal').hidden = false;
-            document.getElementById('excuseFile').value = '';
+        }
+
+        function openFullExcuseImage() {
+            const student = currentSessionStudents[currentExcuseIndex];
+            if (!student || !student.excuse) return;
+            const viewer = document.getElementById('excuseViewerModal');
+            document.getElementById('excuseViewerImg').src = student.excuse;
+            document.getElementById('excuseViewerLabel').textContent = student.name;
+            viewer.hidden = false;
+        }
+
+        function downloadCurrentExcuse() {
+            const student = currentSessionStudents[currentExcuseIndex];
+            if (!student || !student.excuse) return;
+            const a = document.createElement('a');
+            a.href = student.excuse;
+            a.download = student.excuseFileName || 'excuse_letter';
+            a.click();
+        }
+
+        function markExcused() {
+            currentSessionStudents[currentExcuseIndex].status = 'excused';
+            document.getElementById('excuseModal').hidden = true;
+            saveAttendanceSession();
+            renderStudentTable(filterStudentsData());
+            showToast('Student marked as Excused ✓');
         }
 
         function closeExcuseModal(e) {
             if (!e || e.target === document.getElementById('excuseModal'))
                 document.getElementById('excuseModal').hidden = true;
-        }
-
-        function previewExcuse(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = ev => {
-                const img = document.getElementById('excusePreview');
-                const pmt = document.getElementById('uploadPrompt');
-                if (file.type.startsWith('image/')) {
-                    img.src = ev.target.result;
-                    img.hidden = false;
-                    pmt.hidden = true;
-                } else {
-                    pmt.innerHTML = `<strong style="color:var(--brand)">📄 ${file.name}</strong><p style="font-size:12px;margin-top:4px">PDF attached</p>`;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function saveExcuse() {
-            const file = document.getElementById('excuseFile').files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = ev => {
-                    currentSessionStudents[currentExcuseIndex].excuse = ev.target.result;
-                    saveAttendanceSession();
-                };
-                reader.readAsDataURL(file);
-            }
-            currentSessionStudents[currentExcuseIndex].status = 'excused';
-            document.getElementById('excuseModal').hidden = true;
-            saveAttendanceSession();
-            renderStudentTable(filterStudentsData());
-            showToast('Excuse letter saved ✓');
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -1030,6 +1170,19 @@
             });
 
             DB.saveTeacherData(session.id, teacherData);
+
+            // Notify enrolled students about the new announcement
+            const postedClass = (teacherData.classes || []).find(c => c.code === selectedNewsClass);
+            const className = postedClass ? postedClass.name : selectedNewsClass;
+            const enrolledStudents = postedClass ? (postedClass.enrolledStudents || []) : [];
+            const teacherFullName = `${session.firstname} ${session.lastname}`.trim();
+            enrolledStudents.forEach(studentId => {
+                pushStudentNotification(studentId, {
+                    icon: '📢',
+                    title: `New announcement in ${className}`,
+                    body: `${teacherFullName} posted a new announcement`,
+                });
+            });
 
             // Clear form
             editor.innerHTML = '';
@@ -1697,6 +1850,33 @@
             }
 
             DB.saveTeacherData(session.id, teacherData);
+
+            // Notify newly added students
+            const teacherFullName = `${session.firstname} ${session.lastname}`.trim();
+            if (editingClassCode) {
+                // Find students who weren't enrolled before but are now
+                const oldClass = (DB.getTeacherData(session.id).classes || []).find(c => c.code === editingClassCode);
+                const oldEnrolled = new Set((oldClass ? oldClass.enrolledStudents : []) || []);
+                selectedStudents.forEach(studentId => {
+                    if (!oldEnrolled.has(studentId)) {
+                        pushStudentNotification(studentId, {
+                            icon: '🏫',
+                            title: `Added to ${name}`,
+                            body: `${teacherFullName} added you to ${name} (${code})`,
+                        });
+                    }
+                });
+            } else {
+                // New class — notify all selected students
+                selectedStudents.forEach(studentId => {
+                    pushStudentNotification(studentId, {
+                        icon: '🏫',
+                        title: `Added to ${name}`,
+                        body: `${teacherFullName} added you to ${name} (${code})`,
+                    });
+                });
+            }
+
             document.getElementById('classModal').hidden = true;
             populateClassDropdowns();
             renderClasses();
@@ -1835,7 +2015,484 @@
             DB.clearSession();
             window.location.href = 'index.html';
         }
+
+        /* ══════════════════════════════════════════════════════════════
+           EXCUSE LETTERS PAGE
+        ════════════════════════════════════════════════════════════ */
+        let excuseClassFilter = 'ALL';
+
+        function renderExcuseLetters() {
+            const td = DB.getTeacherData(session.id);
+            const allStudents = DB.getAll().filter(u => u.role === 'student');
+
+            // Collect all submitted excuse letters from all sessions
+            const letters = [];
+            Object.entries(td.sessions || {}).forEach(([key, records]) => {
+                const parts = key.split('_');
+                const classCode = parts[0];
+                const date = parts.slice(1).join('_');
+                const cls = (td.classes || []).find(c => c.code === classCode);
+                records.forEach(r => {
+                    if (r.excuse) {
+                        letters.push({
+                            classCode,
+                            className: cls ? cls.name : classCode,
+                            date,
+                            studentId: r.studentId,
+                            name: r.name || r.studentId,
+                            excuse: r.excuse,
+                            excuseFileName: r.excuseFileName || 'excuse_letter',
+                            submittedAt: r.excuseSubmittedAt || null,
+                            status: r.status,
+                        });
+                    }
+                });
+            });
+
+            // Sort newest first
+            letters.sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+
+            // Update sidebar badge
+            const badge = document.getElementById('excuseNavBadge');
+            if (letters.length > 0) { badge.textContent = letters.length; badge.hidden = false; }
+            else { badge.hidden = true; }
+
+            // Build filter pills
+            const classCodes = [...new Set(letters.map(l => l.classCode))];
+            const filterBar = document.getElementById('excuseFilterBar');
+            filterBar.innerHTML = [
+                `<button class="excuse-filter-pill ${excuseClassFilter === 'ALL' ? 'active' : ''}" onclick="setExcuseFilter('ALL')">All Classes</button>`,
+                ...classCodes.map(code => {
+                    const cls = (td.classes || []).find(c => c.code === code);
+                    return `<button class="excuse-filter-pill ${excuseClassFilter === code ? 'active' : ''}" onclick="setExcuseFilter('${code}')">${code} &mdash; ${cls ? cls.name : code}</button>`;
+                })
+            ].join('');
+
+            // Filter by selected class
+            const filtered = excuseClassFilter === 'ALL' ? letters : letters.filter(l => l.classCode === excuseClassFilter);
+
+            const grid = document.getElementById('excuseCardsGrid');
+            if (!filtered.length) {
+                grid.innerHTML = `<div class="excuse-empty-state"><div style="font-size:42px">📩</div><p>No excuse letters ${excuseClassFilter !== 'ALL' ? 'for this class' : 'submitted yet'}</p><span>Letters will appear here once students upload them</span></div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map((l, i) => {
+                const isImage = l.excuse.startsWith('data:image/');
+                const dateFormatted = l.date ? new Date(l.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                const submittedStr = l.submittedAt ? new Date(l.submittedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+                return `
+                <div class="excuse-letter-card" style="animation-delay:${i * 0.05}s">
+                    <div class="elc-class-tag">${l.classCode}</div>
+                    <div class="elc-thumb-wrap" onclick="viewExcuseLetter('${l.excuse.substring(0, 5) === 'data:' ? '' : l.excuse}', '${l.excuseFileName}', ${i})">
+                        ${isImage
+                        ? `<img src="${l.excuse}" class="elc-thumb" alt="Excuse letter from ${l.name}">`
+                        : `<div class="elc-pdf-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>PDF</span></div>`
+                    }
+                        <div class="elc-thumb-overlay">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            ${isImage ? 'View' : 'Download'}
+                        </div>
+                    </div>
+                    <div class="elc-body">
+                        <div class="elc-student">${l.name}</div>
+                        <div class="elc-meta">
+                            <span class="elc-class-name">${l.className}</span>
+                            <span class="elc-dot">&bull;</span>
+                            <span>${dateFormatted}</span>
+                        </div>
+                        <div class="elc-submitted">Submitted: ${submittedStr}</div>
+                    </div>
+                    <div class="elc-actions">
+                        ${isImage
+                        ? `<button class="elc-btn-view" onclick="viewExcuseLetter('${l.excuse.substring(0, 5)}', '${l.excuseFileName}', ${i})">View Full</button>`
+                        : `<button class="elc-btn-view" onclick="downloadExcuseLetter('${l.excuseFileName}', ${i})">Download PDF</button>`
+                    }
+                        <span class="elc-status elc-status-${l.status}">${l.status.charAt(0).toUpperCase() + l.status.slice(1)}</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Store letter data for viewer
+            window._excuseLetters = filtered;
+        }
+
+        function setExcuseFilter(code) {
+            excuseClassFilter = code;
+            renderExcuseLetters();
+        }
+
+        function viewExcuseLetter(prefix, fileName, idx) {
+            const letter = window._excuseLetters && window._excuseLetters[idx];
+            if (!letter) return;
+            const isImage = letter.excuse.startsWith('data:image/');
+            if (!isImage) {
+                downloadExcuseLetter(fileName, idx);
+                return;
+            }
+            const viewer = document.getElementById('excuseViewerModal');
+            const img = document.getElementById('excuseViewerImg');
+            img.src = letter.excuse;
+            document.getElementById('excuseViewerLabel').textContent = `${letter.name} — ${letter.classCode} — ${letter.date}`;
+            viewer.hidden = false;
+        }
+
+        function downloadExcuseLetter(fileName, idx) {
+            const letter = window._excuseLetters && window._excuseLetters[idx];
+            if (!letter) return;
+            const a = document.createElement('a');
+            a.href = letter.excuse;
+            a.download = letter.excuseFileName || fileName || 'excuse_letter';
+            a.click();
+        }
+
+        function closeExcuseViewer() {
+            document.getElementById('excuseViewerModal').hidden = true;
+            document.getElementById('excuseViewerImg').src = '';
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           AUTO-SYNC: pick up student excuse submissions in real-time
+           Runs every 8 s — only updates excuse fields, never disturbs
+           teacher edits (status radios, remarks, etc.)
+        ══════════════════════════════════════════════════════════════ */
+        function syncExcusesFromDB() {
+            if (!currentClassCode || !currentDate) return;
+            const fresh = DB.getTeacherData(session.id);
+            const key = `${currentClassCode}_${currentDate}`;
+            const freshRecords = fresh.sessions[key] || [];
+            let changed = false;
+
+            // 1. Update excuse on any existing in-memory student record
+            currentSessionStudents.forEach(student => {
+                const fr = freshRecords.find(r => r.studentId === student.studentId);
+                if (fr && fr.excuse && fr.excuse !== student.excuse) {
+                    student.excuse = fr.excuse;
+                    student.excuseFileName = fr.excuseFileName || '';
+                    student.excuseSubmittedAt = fr.excuseSubmittedAt || '';
+                    if (student.status === 'absent') student.status = 'excused';
+                    changed = true;
+                }
+            });
+
+            // 2. Add any DB records with excuses not yet in our in-memory list
+            freshRecords.forEach(fr => {
+                if (!fr.excuse) return;
+                const exists = currentSessionStudents.find(s => s.studentId === fr.studentId);
+                if (!exists) {
+                    currentSessionStudents.push({
+                        studentId: fr.studentId,
+                        name: fr.name,
+                        status: fr.status || 'excused',
+                        timeIn: fr.timeIn || null,
+                        timeOut: fr.timeOut || null,
+                        remark: fr.remark || '',
+                        excuse: fr.excuse,
+                        excuseFileName: fr.excuseFileName || '',
+                        excuseSubmittedAt: fr.excuseSubmittedAt || '',
+                    });
+                    changed = true;
+                }
+            });
+
+            if (changed) {
+                renderStudentTable(filterStudentsData());
+                showToast('📎 New excuse letter received from a student');
+
+                // Collect all newly-arrived excuse students so we can push per-student notifs
+                const newlyExcused = [];
+                freshRecords.forEach(fr => {
+                    if (!fr.excuse) return;
+                    // A record is "new" if it just appeared (was detected as changed above)
+                    const student = currentSessionStudents.find(s => s.studentId === fr.studentId);
+                    if (student && student.excuse === fr.excuse) {
+                        // This record was the one that triggered the change
+                        newlyExcused.push(student);
+                    }
+                });
+                // Fallback: if we can't narrow it down, just push a generic notif
+                if (newlyExcused.length === 0) {
+                    pushNotification({
+                        icon: '📎',
+                        title: 'New excuse letter',
+                        body: 'A student submitted an excuse letter.',
+                        time: new Date().toISOString(),
+                    });
+                } else {
+                    newlyExcused.forEach(s => {
+                        pushNotification({
+                            icon: '📎',
+                            title: `Excuse letter from ${s.name}`,
+                            body: `Class ${currentClassCode} • ${currentDate}`,
+                            time: new Date().toISOString(),
+                        });
+                    });
+                }
+            }
+        }
+
+        // ── Real-time: fires instantly when any other tab writes to localStorage ──
+        window.addEventListener('storage', function (e) {
+            // Only react to changes in this teacher's data key
+            if (e.key === 'attendease_teacher_' + session.id) {
+                syncExcusesFromDB();
+            }
+        });
+
+        // ── Fallback poll every 1 s (handles same-tab and file:// edge cases) ──
+        setInterval(syncExcusesFromDB, 1000);
+
+        /* ══════════════════════════════════════════════════════════════
+           NOTIFICATIONS
+        ══════════════════════════════════════════════════════════════ */
+        const NOTIF_KEY = () => `attendease_notifs_teacher_${session.id}`;
+
+        // Load persisted notifications from localStorage
+        function loadNotifications() {
+            try { return JSON.parse(localStorage.getItem(NOTIF_KEY()) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveNotifications(list) {
+            try { localStorage.setItem(NOTIF_KEY(), JSON.stringify(list)); } catch { }
+        }
+
+        function pushNotification(notif) {
+            const list = loadNotifications();
+            list.unshift({ ...notif, id: Date.now() + Math.random(), read: false });
+            // Keep max 50 notifications
+            if (list.length > 50) list.splice(50);
+            saveNotifications(list);
+            renderNotifPanel();
+        }
+
+        /** Push a notification into a student's own notification store (cross-user, same origin) */
+        function pushStudentNotification(studentId, notif) {
+            const key = `attendease_student_notifs_${studentId}`;
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch { }
+            list.unshift({ ...notif, id: Date.now() + Math.random(), read: false, time: new Date().toISOString() });
+            if (list.length > 50) list.splice(50);
+            try { localStorage.setItem(key, JSON.stringify(list)); } catch { }
+        }
+
+        function renderNotifPanel() {
+            const list = loadNotifications();
+            const unread = list.filter(n => !n.read).length;
+            const badge = document.getElementById('notifBadge');
+            badge.textContent = unread > 99 ? '99+' : unread;
+            badge.hidden = unread === 0;
+
+            const listEl = document.getElementById('notifList');
+            if (!list.length) {
+                listEl.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+                return;
+            }
+            listEl.innerHTML = list.map(n => `
+                <div class="notif-item${n.read ? '' : ' notif-unread'}" data-id="${n.id}" onclick="markNotifRead(${n.id})">
+                    <div class="notif-item-icon">${n.icon || '🔔'}</div>
+                    <div class="notif-item-body">
+                        <div class="notif-item-title">${n.title}</div>
+                        <div class="notif-item-sub">${n.body || ''}</div>
+                        <div class="notif-item-time">${formatNotifTime(n.time)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatNotifTime(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            const now = new Date();
+            const diff = Math.floor((now - d) / 1000);
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            return d.toLocaleDateString();
+        }
+
+        function toggleNotifPanel() {
+            const panel = document.getElementById('notifPanel');
+            const btn = document.getElementById('notifBtn');
+            const isHidden = panel.hidden;
+
+            if (!isHidden) {
+                panel.hidden = true;
+                return;
+            }
+
+            // Position the panel below the bell button using its live bounding rect
+            const rect = btn.getBoundingClientRect();
+            panel.style.top = (rect.bottom + 8) + 'px';
+            panel.style.right = (window.innerWidth - rect.right) + 'px';
+            panel.style.left = 'auto';
+
+            panel.hidden = false;
+
+            // Mark all as read when opening
+            const list = loadNotifications().map(n => ({ ...n, read: true }));
+            saveNotifications(list);
+            renderNotifPanel();
+        }
+
+        function markNotifRead(id) {
+            const list = loadNotifications().map(n => n.id === id ? { ...n, read: true } : n);
+            saveNotifications(list);
+            renderNotifPanel();
+        }
+
+        function clearAllNotifs() {
+            saveNotifications([]);
+            renderNotifPanel();
+            document.getElementById('notifPanel').hidden = true;
+        }
+
+        // Close panel when clicking outside — must check BOTH wrapper and panel
+        // since the panel is now a body-level element (not inside the wrapper)
+        document.addEventListener('click', function (e) {
+            const wrapper = document.getElementById('notifWrapper');
+            const panel = document.getElementById('notifPanel');
+            if (!panel.hidden &&
+                wrapper && !wrapper.contains(e.target) &&
+                !panel.contains(e.target)) {
+                panel.hidden = true;
+            }
+        });
+
+        // Initial render on boot
+        renderNotifPanel();
+
+        /* ══════════════════════════════════════════════════════════════
+           TEACHER PROFILE PICTURE
+        ══════════════════════════════════════════════════════════════ */
+        function loadTeacherProfilePic() {
+            const td = DB.getTeacherData(session.id);
+            const avatarImg = document.getElementById('tAvatarImg');
+            const avatarInitials = document.getElementById('tAvatar');
+
+            if (td.profilePic) {
+                avatarImg.src = td.profilePic;
+                avatarImg.hidden = false;
+                avatarInitials.style.display = 'none';
+            } else {
+                avatarImg.hidden = true;
+                avatarImg.src = '';
+                avatarInitials.style.display = '';
+            }
+        }
+
+        function openTeacherProfileModal() {
+            const fullName = `${session.firstname} ${session.lastname}`.trim();
+            const initials = (session.firstname[0] + (session.lastname[0] || '')).toUpperCase();
+            const td = DB.getTeacherData(session.id);
+
+            document.getElementById('tProfileName').textContent = fullName || '—';
+            document.getElementById('tProfileId').textContent = session.uid || '—';
+            document.getElementById('tProfileEmail').textContent = session.email || '—';
+
+            const profileAvatarInitials = document.getElementById('tProfileAvatarInitials');
+            const profileAvatarImg = document.getElementById('tProfileAvatarImg');
+            const removeBtn = document.getElementById('tRemovePhotoBtn');
+
+            profileAvatarInitials.textContent = initials;
+            if (td.profilePic) {
+                profileAvatarImg.src = td.profilePic;
+                profileAvatarImg.hidden = false;
+                profileAvatarInitials.style.display = 'none';
+                removeBtn.hidden = false;
+            } else {
+                profileAvatarImg.hidden = true;
+                profileAvatarImg.src = '';
+                profileAvatarInitials.style.display = '';
+                removeBtn.hidden = true;
+            }
+
+            document.getElementById('teacherProfileModal').hidden = false;
+        }
+
+        function closeTeacherProfileModal(e) {
+            if (!e || e.target === document.getElementById('teacherProfileModal')) {
+                document.getElementById('teacherProfileModal').hidden = true;
+            }
+        }
+
+        function handleTeacherProfilePicUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image too large — please use one under 2 MB.');
+                event.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const td = DB.getTeacherData(session.id);
+                    td.profilePic = ev.target.result;
+                    DB.saveTeacherData(session.id, td);
+
+                    // Update sidebar avatar
+                    const avatarImg = document.getElementById('tAvatarImg');
+                    avatarImg.src = ev.target.result;
+                    avatarImg.hidden = false;
+                    document.getElementById('tAvatar').style.display = 'none';
+
+                    // Update modal avatar
+                    const profileAvatarImg = document.getElementById('tProfileAvatarImg');
+                    profileAvatarImg.src = ev.target.result;
+                    profileAvatarImg.hidden = false;
+                    document.getElementById('tProfileAvatarInitials').style.display = 'none';
+                    document.getElementById('tRemovePhotoBtn').hidden = false;
+
+                    showToast('Profile picture saved ✓');
+                } catch (e) {
+                    showToast('Could not save photo — storage may be full.');
+                }
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function removeTeacherProfilePic() {
+            const td = DB.getTeacherData(session.id);
+            delete td.profilePic;
+            DB.saveTeacherData(session.id, td);
+
+            const initials = (session.firstname[0] + (session.lastname[0] || '')).toUpperCase();
+
+            // Revert sidebar
+            const avatarImg = document.getElementById('tAvatarImg');
+            avatarImg.hidden = true;
+            avatarImg.src = '';
+            const avatarInitials = document.getElementById('tAvatar');
+            avatarInitials.textContent = initials;
+            avatarInitials.style.display = '';
+
+            // Revert modal
+            const profileAvatarImg = document.getElementById('tProfileAvatarImg');
+            profileAvatarImg.hidden = true;
+            profileAvatarImg.src = '';
+            document.getElementById('tProfileAvatarInitials').textContent = initials;
+            document.getElementById('tProfileAvatarInitials').style.display = '';
+            document.getElementById('tRemovePhotoBtn').hidden = true;
+
+            showToast('Profile picture removed');
+        }
+
     </script>
 </body>
+
+<!-- ═══ EXCUSE LETTER IMAGE VIEWER ═══ -->
+<div id="excuseViewerModal" hidden onclick="closeExcuseViewer()"
+    style="position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:zoom-out">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:90%;max-width:800px">
+        <span id="excuseViewerLabel" style="color:#fff;font-size:14px;font-weight:600;opacity:.85"></span>
+        <button onclick="closeExcuseViewer()"
+            style="background:rgba(255,255,255,0.12);border:none;border-radius:8px;color:#fff;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600">Close
+            ×</button>
+    </div>
+    <img id="excuseViewerImg" onclick="event.stopPropagation()" src="" alt="Excuse letter"
+        style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5);cursor:default">
+</div>
 
 </html>

@@ -497,6 +497,73 @@ const DB = (() => {
         },
 
         /**
+         * Called by the student dashboard when submitting an excuse letter.
+         * Writes the excuse file (as base64 dataUrl) into the teacher session
+         * record for the given class + date and marks the student as 'excused'.
+         *
+         * @param {object} studentSession — the logged-in student session
+         * @param {string} classCode      — e.g. 'ENG'
+         * @param {string} date           — 'YYYY-MM-DD'
+         * @param {string} dataUrl        — base64-encoded file content
+         * @param {string} fileName       — original file name for reference
+         * @returns {{ success:boolean, message:string }}
+         */
+        submitStudentExcuse(studentSession, classCode, date, dataUrl, fileName) {
+            const teacher = this.getTeacherAccount();
+            if (!teacher) return { success: false, message: 'No teacher account found.' };
+
+            const td = this.getTeacherData(teacher.id);
+            const key = `${classCode}_${date}`;
+            if (!td.sessions[key]) td.sessions[key] = [];
+
+            let record = td.sessions[key].find(r => r.studentId === studentSession.uid);
+            if (!record) {
+                // Create a new record if one doesn't exist yet for this student
+                record = {
+                    studentId: studentSession.uid,
+                    name: `${studentSession.firstname} ${studentSession.lastname}`.trim(),
+                    status: 'excused',
+                    timeIn: null,
+                    timeOut: null,
+                    remark: '',
+                    excuse: null,
+                };
+                td.sessions[key].push(record);
+            }
+
+            record.excuse = dataUrl;
+            record.excuseFileName = fileName || 'excuse_letter';
+            record.excuseSubmittedAt = new Date().toISOString();
+            record.status = 'excused';
+
+            this.saveTeacherData(teacher.id, td);
+
+            // Also store a reference in the student's own data
+            const sd = this.getStudentData(studentSession.id);
+            sd.excuseLetters = sd.excuseLetters || [];
+            // Remove any previous one for same class+date, then push new
+            sd.excuseLetters = sd.excuseLetters.filter(e => !(e.classCode === classCode && e.date === date));
+            sd.excuseLetters.push({ classCode, date, fileName: fileName || 'excuse_letter', submittedAt: record.excuseSubmittedAt });
+            this.saveStudentData(studentSession.id, sd);
+
+            return { success: true, message: 'Excuse letter submitted successfully ✓' };
+        },
+
+        /**
+         * Returns the excuse letter dataUrl (or null) that a student submitted
+         * for a given class + date, reading from the teacher's session record.
+         */
+        getStudentExcuse(studentUid, classCode, date) {
+            const teacher = this.getTeacherAccount();
+            if (!teacher) return null;
+            const td = this.getTeacherData(teacher.id);
+            const key = `${classCode}_${date}`;
+            const records = td.sessions[key] || [];
+            const record = records.find(r => r.studentId === studentUid);
+            return record ? { dataUrl: record.excuse, fileName: record.excuseFileName, submittedAt: record.excuseSubmittedAt } : null;
+        },
+
+        /**
          * DEV ONLY — Clears timeIn and timeOut for every student in every
          * teacher session. Also resets each student's scan log and counters.
          * Triggered automatically on page load when DEV_CLEAR_ATTENDANCE_TIMES = true.
