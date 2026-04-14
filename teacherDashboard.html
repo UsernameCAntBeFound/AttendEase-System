@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AttendEase  Teacher</title>
-    <script src="cloud-sync.js?v=1.1"></script>
-    <script src="db.js?v=1.1"></script>
+    <script src="cloud-sync.js?v=1.2"></script>
+    <script src="db.js?v=1.2"></script>
     <link rel="stylesheet" href="teacherDashboard.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -739,15 +739,15 @@
                 navigate(lastPage);
             }
 
-            // Expose for cloud-sync.js
+            // Expose for cloud-sync.js — called when cloud pull detects changes
             window.renderDashboard = () => {
-                loadAttendanceSession();
+                loadAttendanceSession(true); // forceRender=true bypasses hash check
             };
 
-            // Listen for storage events (scans in other tabs)
+            // Listen for storage events (student scans from other browser tabs/devices)
             window.addEventListener('storage', (e) => {
-                if (e.key && e.key.startsWith('attendease_')) {
-                    loadAttendanceSession();
+                if (e.key && e.key.startsWith('attendease_teacher_')) {
+                    loadAttendanceSession(true);
                 }
             });
         });
@@ -2327,21 +2327,10 @@
                     }
                 }
 
-                //  Real-time: fires instantly when any other tab writes to localStorage 
-                window.addEventListener('storage', function (e) {
-                    // Only react to changes in this teacher's data key
-                    if (e.key === 'attendease_teacher_' + session.id) {
-                        syncExcusesFromDB();
-                        loadAttendanceSession(); // UPDATE FULL TABLE ON ANY SCAN
-                    }
-                });
+                //  Real-time cross-tab listener (already registered in DOMContentLoaded — no duplicate needed)
 
-                //  Fallback poll every 1s (handles same-tab and file:// edge cases) 
-                setInterval(() => {
-                    syncExcusesFromDB();
-                    // loadAttendanceSession logic is now also safely called by this interval
-                    // through the script block placed at the bottom of the body.
-                }, 1000);
+                //  Fallback poll every 2s for same-origin cross-tab and local file:// edge cases
+                setInterval(() => { syncExcusesFromDB(); }, 2000);
 
                 /* ----------------------------------------------------------------------------------------------------------------------------
                    NOTIFICATIONS
@@ -2592,11 +2581,12 @@
             style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5);cursor:default">
     </div>
 
-    <!-- Move polling to its own block -->
+    <!-- Attendance polling — runs every 3s to pick up cloud-synced scans -->
     <script>
         setInterval(() => {
-            if (document.visibilityState === 'visible') {
-                if (typeof loadAttendanceSession === 'function') loadAttendanceSession();
+            if (document.visibilityState === 'visible'
+                && typeof loadAttendanceSession === 'function') {
+                loadAttendanceSession(true);
             }
         }, 3000);
     </script>
