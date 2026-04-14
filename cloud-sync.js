@@ -213,8 +213,8 @@ window.initCloudDb = async function () {
 };
 
 // ── 3. Adaptive polling: 8 s when visible, 30 s when tab is hidden ────────────
-const POLL_ACTIVE_MS  =  8000;   // ← was 3 000 ms
-const POLL_HIDDEN_MS  = 30000;
+const POLL_ACTIVE_MS  =  3000;
+const POLL_HIDDEN_MS  = 15000;
 
 let _pollTimer = null;
 

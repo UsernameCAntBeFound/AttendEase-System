@@ -203,7 +203,7 @@
                         style="background:rgba(249,115,22,.12);color:#f97316" onclick="toggleStatusFilter('late')"><span
                             id="lateCount">0</span> Late</div>
                     <div class="stat-chip blue" id="chip-total"><span id="totalCount">0</span> Total</div>
-                    <button class="btn-accent" onclick="loadAttendanceSession()"
+                    <button class="btn-accent" onclick="manualRefresh()"
                         style="margin-left:auto;padding:6px 12px;font-size:12px">
                         ↻ Refresh
                     </button>
@@ -687,6 +687,7 @@
         let selectedNewsClass = null;
         let attendanceMap = null;
         let mapMarkers = [];
+        let autoRefreshInterval = null;
 
         /* ══════════════════════════════════════════════════════════════
            INIT
@@ -717,11 +718,26 @@
             renderNewsFeed();
             initAttendanceMap();
 
-            // Restore last-visited tab on refresh; fresh login always starts on QR Code
-            const lastPage = sessionStorage.getItem('teacher_last_page');
             if (lastPage && document.getElementById('page-' + lastPage)) {
                 navigate(lastPage);
             }
+
+            // Expose for cloud-sync.js
+            window.renderDashboard = loadAttendanceSession;
+
+            // Auto-refresh every 5 seconds
+            autoRefreshInterval = setInterval(() => {
+                if (document.getElementById('page-attendance').classList.contains('active')) {
+                    loadAttendanceSession();
+                }
+            }, 5000);
+
+            // Listen for storage events (scans in other tabs)
+            window.addEventListener('storage', (e) => {
+                if (e.key && e.key.startsWith('attendease_')) {
+                    loadAttendanceSession();
+                }
+            });
         });
 
         /** Populate all class dropdowns from teacher data */
@@ -830,6 +846,11 @@
         }
 
         function loadClass() { loadAttendanceSession(); }
+
+        function manualRefresh() {
+            loadAttendanceSession();
+            showToast('Progress Refreshed ✓');
+        }
 
         function renderStudentTable(list) {
             const tbody = document.getElementById('studentBody');
