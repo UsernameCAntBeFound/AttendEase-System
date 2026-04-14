@@ -718,6 +718,7 @@
             renderNewsFeed();
             initAttendanceMap();
 
+            const lastPage = sessionStorage.getItem('teacher_last_page');
             if (lastPage && document.getElementById('page-' + lastPage)) {
                 navigate(lastPage);
             }
