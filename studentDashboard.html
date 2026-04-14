@@ -883,12 +883,27 @@
                 resumeScan();
             }
 
-            if (navigator.geolocation && currentMode === 'in') {
-                navigator.geolocation.getCurrentPosition(
-                    pos => recordWithLocation(pos.coords),
-                    () => recordWithLocation(null),          // denied / error → still record
-                    { timeout: 5000, maximumAge: 60000 }
-                );
+            if (currentMode === 'in') {
+                if (navigator.geolocation) {
+                    showToast('🛰 Requesting location...');
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            showToast('📍 Location captured ✓');
+                            recordWithLocation(pos.coords);
+                        },
+                        err => {
+                            let msg = 'Location access denied.';
+                            if (err.code === 1) msg = 'Location denied. Please enable in browser settings.';
+                            if (err.code === 3) msg = 'Location timeout — recording without map coordinates.';
+                            showToast('⚠ ' + msg);
+                            recordWithLocation(null);
+                        },
+                        { timeout: 8000, maximumAge: 30000, enableHighAccuracy: true }
+                    );
+                } else {
+                    showToast('⚠ Geolocation not supported by this browser.');
+                    recordWithLocation(null);
+                }
             } else {
                 recordWithLocation(null);
             }

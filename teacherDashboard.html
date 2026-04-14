@@ -716,7 +716,7 @@
             renderReportPreview();
             renderClasses();
             renderNewsFeed();
-            initAttendanceMap();
+            // initAttendanceMap(); // Move to navigate logic to ensure visibility
 
             const lastPage = sessionStorage.getItem('teacher_last_page');
             if (lastPage && document.getElementById('page-' + lastPage)) {
@@ -773,6 +773,7 @@
             document.getElementById('pageTitle').textContent = PAGE_TITLES[page];
             document.getElementById('searchBox').style.display = page === 'attendance' ? '' : 'none';
             if (page === 'attendance') { 
+                initAttendanceMap(); // Ensure initialized at least once
                 loadAttendanceSession(); 
                 if (attendanceMap) setTimeout(() => attendanceMap.invalidateSize(), 100);
             }
