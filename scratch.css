@@ -1,0 +1,204 @@
+
+
+/* IMPORTED SIDEBAR CLASSES */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-w);
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 24px;
+    z-index: 200;
+    transition: transform 0.3s ease;
+}
+.sidebar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+}
+.sidebar-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: none;
+    padding: 4px;
+}
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 12px;
+    flex: 1;
+}
+.sidebar-collapsed .sidebar {
+    --sidebar-w: 80px;
+}
+.sidebar-collapsed .brand {
+    display: none;
+}
+.sidebar-collapsed .teacher-info {
+    justify-content: center;
+    padding: 16px 0;
+}
+.sidebar-collapsed .t-avatar-wrap {
+    margin: 0 auto;
+}
+.sidebar-collapsed .t-name,
+body.sidebar-collapsed .t-role {
+    display: none;
+}
+.sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding: 12px;
+    font-size: 0;
+}
+.sidebar-collapsed .nav-item svg {
+    margin: 0;
+}
+.sidebar-collapsed .sign-out-btn {
+    justify-content: center;
+    padding: 12px;
+    font-size: 0;
+    margin: 0 auto;
+    width: calc(100% - 24px);
+}
+.sidebar-collapsed .sign-out-btn svg {
+    margin: 0;
+}
+.sidebar-collapsed .hamburger span {
+    width: 20px;
+}
+.sidebar {
+        transform: translateX(-100%);
+    }
+.sidebar.open {
+        transform: translateX(0);
+    }
+.sidebar-close {
+        display: block;
+    }
+.sidebar {
+        transform: translateX(-100%);
+    }
+.sidebar.open {
+        transform: translateX(0);
+    }
+.sidebar-close {
+        display: block;
+    }
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 12px;
+    flex: 1;
+}
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+}
+.nav-item:hover {
+    background: rgba(99, 102, 241, 0.06);
+    color: var(--text);
+}
+.nav-item.active {
+    background: rgba(75, 120, 229, 0.1);
+    color: var(--brand);
+    font-weight: 600;
+}
+.nav-item {
+    justify-content: center;
+    padding: 12px;
+    font-size: 0;
+}
+.nav-item svg {
+    margin: 0;
+}
+.main-wrap {
+    margin-left: var(--sidebar-w);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: margin-left 0.3s ease;
+    min-width: 0;
+}
+.main-wrap {
+        margin-left: 0;
+    }
+.main-wrap {
+        margin-left: 0;
+    }
+.topbar {
+    height: var(--top-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 16px;
+}
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+.hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text-muted);
+    border-radius: 2px;
+    transition: all 0.2s;
+}
+.hamburger span {
+    width: 20px;
+}
+.hamburger {
+        display: flex;
+    }
+.hamburger {
+        display: flex;
+    }

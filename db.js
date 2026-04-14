@@ -60,7 +60,7 @@ const DB = (() => {
     const KEY = 'attendease_users';
     const VKEY = 'attendease_version';
     const SKEY = 'attendease_session';
-    const VERSION = '3';  // ← bump this to force a full wipe + re-seed
+    const VERSION = '5';  // ← bump this to force a full wipe + re-seed
 
     // ── Class schedules ────────────────────────────────────────────────────────
     // Each entry: start/end in 'HH:MM' 24-hr; display is the human label.
@@ -80,19 +80,19 @@ const DB = (() => {
             id: 1, role: 'admin',
             firstname: 'Administrator', lastname: '',
             uid: 'ADMIN-001', email: 'admin@school.edu',
-            username: 'admin', password: 'admin123', created: '2024-01-01'
+            username: 'admin', password: 'admin123', created: '2024-01-01', createdBy: 'System'
         },
         {
             id: 2, role: 'teacher',
             firstname: 'Maria', lastname: 'Santos',
             uid: 'EMP-001', email: 'maria.santos@school.edu',
-            username: 'ms.santos', password: 'teacher01', created: '2024-05-15'
+            username: 'ms.santos', password: 'teacher01', created: '2024-05-15', createdBy: 'ADMIN-001'
         },
         {
             id: 3, role: 'student',
             firstname: 'Juan', lastname: 'Dela Cruz',
             uid: '2024-00001', email: 'juan.delacruz@school.edu',
-            username: 'juan.dc', password: 'pass1234', created: '2024-06-01'
+            username: 'juan.dc', password: 'pass1234', created: '2024-06-01', createdBy: 'ADMIN-001'
         },
     ];
 
@@ -172,7 +172,8 @@ const DB = (() => {
 
         authenticate(identifier, password) {
             const user = this.findByLogin(identifier);
-            return (!user || user.password !== password) ? null : user;
+            if (!user || user.password !== password || user.isArchived) return null;
+            return user;
         },
 
         usernameExists(username, excludeId = null) {

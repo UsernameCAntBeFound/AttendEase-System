@@ -11,34 +11,146 @@
     display: none !important;
 }
 
+@keyframes floatOrb1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(60px, -80px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-40px, 50px) scale(0.95);
+    }
+}
+
+@keyframes floatOrb2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    40% {
+        transform: translate(-70px, 60px) scale(1.08);
+    }
+
+    75% {
+        transform: translate(50px, -40px) scale(0.97);
+    }
+}
+
+@keyframes floatOrb3 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    30% {
+        transform: translate(40px, 70px) scale(1.05);
+    }
+
+    70% {
+        transform: translate(-60px, -30px) scale(1.12);
+    }
+}
+
 :root {
-    --bg: #f3efe9;
-    --brand: #2d2f33;
-    --brand-light: #52565e;
-    --brand-dark: #1a1b1f;
-    --brand-gradient: linear-gradient(135deg, #2d2f33 0%, #1a1b1f 100%);
-    --surface: #ffffff;
-    --border: rgba(0, 0, 0, 0.06);
-    --text: #2d2f33;
-    --text-muted: #8c8884;
+    --bg: #f7f8f3;
+    --brand: #6b6b5b;
+    --brand-light: #8a8a78;
+    --brand-dark: #4a4a3c;
+    --brand-gradient: linear-gradient(135deg, #6b6b5b 0%, #4a4a3c 100%);
+    --surface: rgba(247, 248, 243, 0.72);
+    --surface-solid: #f7f8f3;
+    --border: rgba(255, 255, 255, 0.55);
+    --border-subtle: rgba(107, 107, 91, 0.08);
+    --text: #3d3d30;
+    --text-muted: #8a8a78;
     --sidebar-w: 248px;
     --top-h: 58px;
     --radius: 20px;
-    --green: #22c55e;
+    --accent: #a3d977;
+    --accent-light: #c4e8a9;
+    --beige: #d2c7b8;
+    --green: #a3d977;
     --red: #ef4444;
     --amber: #f59e0b;
-    --blue: #3b82f6;
-    --purple: #8b5cf6;
+    --blue: #6b9e5b;
+    --purple: #8a9b6b;
 }
 
 html,
 body {
     height: 100%;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg);
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f7f8f3;
     background-attachment: fixed;
     color: var(--text);
     overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 70% 60% at 15% 15%, rgba(163, 217, 119, 0.42) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 55% at 85% 80%, rgba(210, 199, 184, 0.5) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 60% 5%, rgba(196, 232, 169, 0.38) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 60% at 5% 85%, rgba(163, 217, 119, 0.28) 0%, transparent 60%),
+        linear-gradient(145deg, #eef0e9 0%, #f0ede6 45%, #c5a7bc 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.65;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.orb-1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(163, 217, 119, 0.6) 0%, rgba(196, 232, 169, 0.25) 60%, transparent 100%);
+    top: -100px;
+    left: -100px;
+    animation: floatOrb1 16s ease-in-out infinite;
+}
+
+.orb-2 {
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(210, 199, 184, 0.65) 0%, rgba(220, 210, 195, 0.25) 60%, transparent 100%);
+    bottom: -80px;
+    right: -80px;
+    animation: floatOrb2 19s ease-in-out infinite;
+}
+
+.orb-3 {
+    width: 360px;
+    height: 360px;
+    background: radial-gradient(circle, rgba(196, 232, 169, 0.6) 0%, rgba(163, 217, 119, 0.2) 60%, transparent 100%);
+    top: 35%;
+    right: 8%;
+    animation: floatOrb3 13s ease-in-out infinite;
+}
+
+.orb-4 {
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(107, 107, 91, 0.22) 0%, rgba(163, 217, 119, 0.18) 60%, transparent 100%);
+    bottom: 25%;
+    left: 3%;
+    animation: floatOrb1 21s ease-in-out infinite reverse;
 }
 
 /* ─── SIDEBAR ─────────────────────────── */
@@ -48,10 +160,11 @@ body {
     left: 0;
     bottom: 0;
     width: var(--sidebar-w);
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.38);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 2px 0 24px rgba(45, 47, 51, 0.08);
     display: flex;
     flex-direction: column;
     padding: 0 0 24px;
@@ -63,8 +176,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 20px 14px;
+    height: var(--top-h);
+    padding: 0 20px;
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 .brand {
@@ -255,22 +370,78 @@ body {
     gap: 14px;
 }
 
-.hamburger {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
+.hamburger-mobile,
+.hamburger-desktop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
     padding: 4px;
+    color: var(--text-muted);
+    flex-shrink: 0; /* Anti-squash */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.hamburger span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: var(--text-muted);
-    border-radius: 2px;
+.hamburger-desktop:hover {
+    color: var(--brand);
+    background: rgba(124, 58, 237, 0.05);
+    border-radius: 8px;
+}
+
+/* ─── SIDEBAR COLLAPSED (NARROW) ─────────────────── */
+body.sidebar-collapsed {
+    --sidebar-w: 72px;
+}
+
+body.sidebar-collapsed .brand,
+body.sidebar-collapsed .a-name,
+body.sidebar-collapsed .a-role,
+body.sidebar-collapsed .nav-item span,
+body.sidebar-collapsed .sign-out-btn span {
+    display: none;
+}
+
+body.sidebar-collapsed .sidebar {
+    width: var(--sidebar-w);
+}
+
+body.sidebar-collapsed .sidebar-top,
+body.sidebar-collapsed .admin-info {
+    justify-content: center;
+    padding: 0;
+    height: var(--top-h);
+}
+
+body.sidebar-collapsed .admin-info {
+    padding: 16px 0;
+}
+
+body.sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding: 12px 0;
+    margin: 0 8px;
+}
+
+body.sidebar-collapsed .sign-out-btn {
+    justify-content: center;
+    padding: 12px 0;
+    margin: 0 8px;
+    border: none;
+    background: rgba(239, 68, 68, 0.03);
+}
+
+body.sidebar-collapsed .hamburger-desktop {
+    transform: rotate(180deg);
+}
+
+.hamburger-mobile {
+    display: none;
+}
+
+.hamburger-desktop rect {
+    transition: all 0.2s;
 }
 
 .page-title {
@@ -1215,30 +1386,35 @@ input:focus {
 body.sidebar-collapsed {
     --sidebar-w: 80px;
 }
-body.sidebar-collapsed .sidebar {
-}
+
 body.sidebar-collapsed .brand {
     display: none;
 }
+
 body.sidebar-collapsed .admin-info {
     justify-content: center;
     padding: 16px 0;
 }
+
 body.sidebar-collapsed .a-avatar-wrap {
     margin: 0 auto;
 }
+
 body.sidebar-collapsed .a-name,
 body.sidebar-collapsed .a-role {
     display: none;
 }
+
 body.sidebar-collapsed .nav-item {
     justify-content: center;
     padding: 12px;
     font-size: 0;
 }
+
 body.sidebar-collapsed .nav-item svg {
     margin: 0;
 }
+
 body.sidebar-collapsed .sign-out-btn {
     justify-content: center;
     padding: 12px;
@@ -1246,11 +1422,13 @@ body.sidebar-collapsed .sign-out-btn {
     margin: 0 auto;
     width: calc(100% - 24px);
 }
+
 body.sidebar-collapsed .sign-out-btn svg {
     margin: 0;
 }
+
 body.sidebar-collapsed .hamburger-desktop rect {
-    x: 14; 
+    x: 14;
     width: 7;
 }
 
@@ -1282,8 +1460,12 @@ body.sidebar-collapsed .hamburger-desktop rect {
         margin-left: 0;
     }
 
-    .hamburger {
+    .hamburger-mobile {
         display: flex;
+    }
+
+    .hamburger-desktop {
+        display: none;
     }
 
     .dash-grid {
@@ -1480,4 +1662,48 @@ body.sidebar-collapsed .hamburger-desktop rect {
     text-align: right;
     word-break: break-all;
     max-width: 60%;
+}
+
+/* --- MOBILE RWD & SLIDER INDICATORS --- */
+@media (max-width: 768px) {
+
+    /* Create a visible slider indicator for tables and role tabs */
+    .table-card,
+    .filter-bar {
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        overflow-x: auto;
+    }
+
+    .table-card::-webkit-scrollbar,
+    .filter-bar::-webkit-scrollbar {
+        height: 6px;
+        display: block;
+        /* Force visible scrollbar as slider indicator */
+    }
+
+    .table-card::-webkit-scrollbar-track,
+    .filter-bar::-webkit-scrollbar-track {
+        background: rgba(124, 58, 237, 0.05);
+        border-radius: 10px;
+    }
+
+    .table-card::-webkit-scrollbar-thumb,
+    .filter-bar::-webkit-scrollbar-thumb {
+        background: rgba(124, 58, 237, 0.25);
+        border-radius: 10px;
+    }
+
+    /* Ensure role tabs don't wrap and can slide */
+    .role-tabs {
+        flex-wrap: nowrap;
+        min-width: max-content;
+        padding-bottom: 6px;
+        /* give space for the scrollbar so it doesn't overlap tags */
+    }
+
+    /* Give user table enough width to not squash columns, ensuring action buttons remain visible and interactable via sliding */
+    .user-table {
+        min-width: 600px;
+    }
 }
