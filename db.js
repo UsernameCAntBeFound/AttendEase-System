@@ -405,15 +405,7 @@ const DB = (() => {
                     const classEnd = new Date(now);
                     classEnd.setHours(eh, em, 0, 0);
 
-                    if (now < earlyLimit) {
-                        // Too early — reject without recording
-                        const classStart = new Date(now);
-                        classStart.setHours(sh, sm, 0, 0);
-                        return {
-                            success: false,
-                            message: `Too early to scan. Class starts at ${this.formatTime12h(classStart)}. Scanning opens 15 min before class.`,
-                        };
-                    } else if (now > classEnd) {
+                    if (now > classEnd) {
                         status = 'absent';   // class already finished
                     } else if (now > graceLimit) {
                         status = 'late';
