@@ -836,14 +836,14 @@
                             studentId: student.uid,
                             name: `${student.firstname}`.trim(),
                             status: dbRecord ? dbRecord.status : 'absent',
-                            timeIn: null,
-                            timeOut: null,
-                            remark: '',
+                            timeIn: dbRecord ? dbRecord.timeIn : null,
+                            timeOut: dbRecord ? dbRecord.timeOut : null,
+                            remark: dbRecord ? dbRecord.remark || '' : '',
                             excuse: dbRecord ? dbRecord.excuse || null : null,
                             excuseFileName: dbRecord ? dbRecord.excuseFileName || '' : '',
                             excuseSubmittedAt: dbRecord ? dbRecord.excuseSubmittedAt || '' : '',
                         });
-        }
+                    }
                 });
 
         currentSessionStudents = savedRecords;
@@ -2332,11 +2332,16 @@
                     // Only react to changes in this teacher's data key
                     if (e.key === 'attendease_teacher_' + session.id) {
                         syncExcusesFromDB();
+                        loadAttendanceSession(); // UPDATE FULL TABLE ON ANY SCAN
                     }
                 });
 
-                //  Fallback poll every 1 s (handles same-tab and file:// edge cases) 
-                setInterval(syncExcusesFromDB, 1000);
+                //  Fallback poll every 1s (handles same-tab and file:// edge cases) 
+                setInterval(() => {
+                    syncExcusesFromDB();
+                    // loadAttendanceSession logic is now also safely called by this interval
+                    // through the script block placed at the bottom of the body.
+                }, 1000);
 
                 /* ----------------------------------------------------------------------------------------------------------------------------
                    NOTIFICATIONS
