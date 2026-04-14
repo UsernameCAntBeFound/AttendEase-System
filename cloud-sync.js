@@ -1,234 +1,162 @@
-/**
- * cloud-sync.js
- * Hijacks localStorage to passively sync State to the Neon Database via our Render Proxy.
- *
- * Efficiency improvements (v2):
- *  - Debounce increased to 2500 ms so rapid consecutive writes merge into one request.
- *  - Announcement attachments (base64 blobs) are stripped before syncing — they can be
- *    several MB each and are the #1 cause of slow / dropped syncs.
- *  - profilePic blobs are also excluded (unchanged from v1).
- *  - Polling interval increased to 8 s (30 s when the browser tab is hidden).
- *  - Only keys that actually changed are written during hydration.
- *
- * Usage:
- * Add <script src="cloud-sync.js"></script> before <script src="db.js"></script>
- */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   AttendEase â€” Cloud Synchronization Interface
+   Target Proxy: https://attendease-sync.onrender.com/sync
+   
+   Behavior:
+   This engine hijacks localStorage.setItem to detect changes.
+   It debounces updates to batch rapid writes (like profile pic uploads).
+   It pulls global state periodically to ensure cross-device consistency.
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-const SYNC_URL = 'https://attendease-messenger.onrender.com/api/db/sync';
+const SYNC_URL    = 'https://attendease-sync.onrender.com/sync';
+const DEBOUNCE_MS = 1000;   // Near real-time syncing
+
+// â”€â”€ 0. Internal State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const originalSetItem = Storage.prototype.setItem;
+let syncTimeout       = null;
+window.__cloudSyncPauseUntil = 0;
 
-/**
- * Strip heavyweight blobs from a parsed student/teacher object before sending
- * to the cloud:
- *   • profilePic      — stored locally only, never synced
- *   • announcement attachments — base64 images/files can be multiple MB each;
- *     they are stored in localStorage only (large payloads cause slow/failed syncs)
+function _triggerSync() {
+    window.__cloudSyncPauseUntil = Date.now() + 5000;
+    if (syncTimeout) clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(async () => {
+        try {
+            const state = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k.startsWith('attendease_')) {
+                    state[k] = _stripHeavyFields(k, localStorage.getItem(k));
+                }
+            }
+            // Add sync version
+            const newVersion = Date.now().toString();
+            state['__sync_version'] = newVersion;
+            originalSetItem.call(localStorage, '__sync_version', newVersion);
+
+            await fetch(SYNC_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ state })
+            });
+        } catch (err) {
+            console.warn('Cloud pull failed, retrying later...', err);
+        }
+    }, DEBOUNCE_MS);
+}
+
+/** 
+ * Strips heavy base64 blobs from cloud storage to save Neon DB space.
+ * Heavy blobs (profile pictures, attachments) are kept in LOCAL storage only.
  */
 function _stripHeavyFields(key, value) {
-    // ── Student records ──────────────────────────────────────────────────────
-    if (key.startsWith('attendease_student_')) {
-        try {
-            const parsed = JSON.parse(value);
-            if (!parsed) return value;
+    if (!value) return value;
+    try {
+        const parsed = JSON.parse(value);
+        
+        // Strip profile pictures from all roles
+        if (parsed.profilePic) {
             const { profilePic, ...rest } = parsed;
             return JSON.stringify(rest);
-        } catch { return value; }
-    }
+        }
 
-    // ── Teacher records ──────────────────────────────────────────────────────
-    if (key.startsWith('attendease_teacher_')) {
-        try {
-            const parsed = JSON.parse(value);
-            if (!parsed) return value;
-
-            // Strip profilePic
-            const { profilePic, ...rest } = parsed;
-
-            // Strip attachment dataUrls from every announcement (keep metadata)
+        // Strip heavy attachments from news/announcements
+        if (key.startsWith('attendease_teacher_')) {
+            const rest = { ...parsed };
             if (Array.isArray(rest.announcements)) {
                 rest.announcements = rest.announcements.map(a => ({
                     ...a,
                     attachments: (a.attachments || []).map(att => ({
                         name: att.name,
                         type: att.type,
-                        // dataUrl intentionally omitted — stored in localStorage only
+                        // dataUrl intentionally omitted â€” kept in teacher's local only
                     })),
                 }));
             }
-
             return JSON.stringify(rest);
-        } catch { return value; }
-    }
+        }
 
-    return value;
+        return value;
+    } catch {
+        return value;
+    }
 }
 
-// ── 1. Hijack localStorage — push patches to cloud on every attendease_ write ──
-let syncTimer = null;
-const DEBOUNCE_MS = 2500;   // ← increased from 1 000 ms to batch rapid writes
-
+// â”€â”€ 1. Change Detection â€” Hijack SetItem â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Storage.prototype.setItem = function (key, value) {
-    originalSetItem.call(this, key, value);
-
+    originalSetItem.apply(this, arguments);
     if (key.startsWith('attendease_')) {
-        window.__cloudSyncDirty = true;
-        clearTimeout(syncTimer);
-        syncTimer = setTimeout(async () => {
-            const state = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const k = localStorage.key(i);
-                if (
-                    k.startsWith('attendease_') &&
-                    !k.startsWith('attendease_admin_pic_') &&
-                    !k.startsWith('attendease_notifs_') &&
-                    !k.startsWith('attendease_student_notifs_')
-                ) {
-                    state[k] = _stripHeavyFields(k, localStorage.getItem(k));
-                }
-            }
-            try {
-                await fetch(SYNC_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(state),
-                });
-                console.log('[CloudSync] State pushed to Neon db');
-            } catch (err) {
-                console.warn('[CloudSync] Failed to push state', err);
-            } finally {
-                window.__cloudSyncDirty = false;
-            }
-        }, DEBOUNCE_MS);
+        _triggerSync();
     }
 };
 
-// ── 2. Initial hydration — pull cloud state before app boots ─────────────────
+window.addEventListener('storage', (e) => {
+    if (e.key && e.key.startsWith('attendease_')) {
+        // Pause cloud pull in other tabs when one tab updates storage
+        window.__cloudSyncPauseUntil = Date.now() + 5000;
+    }
+});
+
+// â”€â”€ 2. Initial hydration â€” pull cloud state before app boots â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.initCloudDb = async function () {
-    if (window.__cloudSyncDirty) return; // Skip pulling if we have active pending local saves
+    if (Date.now() < window.__cloudSyncPauseUntil) return; 
     try {
-        const res = await fetch(SYNC_URL);
+        // Cache bust with timestamp to prevent Vercel/CDN caching
+        const res = await fetch(`${SYNC_URL}?t=${Date.now()}`);
         const data = await res.json();
 
         if (data.ok && data.state && Object.keys(data.state).length > 0) {
             let changed = false;
 
             for (const [key, value] of Object.entries(data.state)) {
-                // ── Student records ─────────────────────────────────────────
-                if (key.startsWith('attendease_student_')) {
-                    try {
-                        const local  = JSON.parse(localStorage.getItem(key) || '{}');
-                        const remote = JSON.parse(value || '{}');
+                // Merge remote into local
+                const localStr = localStorage.getItem(key);
+                if (!localStr) {
+                    originalSetItem.call(localStorage, key, value);
+                    changed = true;
+                    continue;
+                }
 
-                        // Preserve local-only fields that are never in the cloud
-                        if (local.profilePic)   remote.profilePic   = local.profilePic;
-
-                        // Merge: cloud is authoritative for most fields, but keep
-                        // any local guardianFbLink if cloud doesn't have it yet
-                        if (local.guardianFbLink && !remote.guardianFbLink) {
-                            remote.guardianFbLink = local.guardianFbLink;
-                        }
-
-                        const merged = JSON.stringify(remote);
-                        if (localStorage.getItem(key) !== merged) {
-                            originalSetItem.call(localStorage, key, merged);
-                            changed = true;
-                        }
-                    } catch {
-                        if (localStorage.getItem(key) !== value) {
-                            originalSetItem.call(localStorage, key, value);
-                            changed = true;
-                        }
+                try {
+                    const local  = JSON.parse(localStr);
+                    const remote = JSON.parse(value);
+                    
+                    // Preserve local heavy data
+                    if (local.profilePic) remote.profilePic = local.profilePic;
+                    
+                    const merged = JSON.stringify(remote);
+                    if (localStr !== merged) {
+                        originalSetItem.call(localStorage, key, merged);
+                        changed = true;
                     }
-                }
-
-                // ── Teacher records ─────────────────────────────────────────
-                else if (key.startsWith('attendease_teacher_')) {
-                    try {
-                        const local  = JSON.parse(localStorage.getItem(key) || '{}');
-                        const remote = JSON.parse(value || '{}');
-
-                        // Preserve local profilePic
-                        if (local.profilePic) remote.profilePic = local.profilePic;
-
-                        // Restore attachment dataUrls for announcements from local copy
-                        // (cloud only stores metadata; the actual blobs stay local)
-                        const localAnn   = (local.announcements  || []);
-                        const remoteAnn  = (remote.announcements || []);
-                        remote.announcements = remoteAnn.map(ra => {
-                            const la = localAnn.find(a => a.id === ra.id);
-                            if (!la) return ra;
-                            // Merge: use local attachments if cloud stripped them
-                            return {
-                                ...ra,
-                                attachments: (ra.attachments || []).map((att, i) => ({
-                                    ...att,
-                                    // Restore dataUrl from local if available
-                                    dataUrl: (la.attachments && la.attachments[i])
-                                        ? la.attachments[i].dataUrl
-                                        : att.dataUrl,
-                                })),
-                            };
-                        });
-
-                        const merged = JSON.stringify(remote);
-                        if (localStorage.getItem(key) !== merged) {
-                            originalSetItem.call(localStorage, key, merged);
-                            changed = true;
-                        }
-                    } catch {
-                        if (localStorage.getItem(key) !== value) {
-                            originalSetItem.call(localStorage, key, value);
-                            changed = true;
-                        }
-                    }
-                }
-
-                // ── Skip local-only keys ────────────────────────────────────
-                else if (
-                    key.startsWith('attendease_admin_pic_') ||
-                    key.startsWith('attendease_notifs_') ||
-                    key.startsWith('attendease_student_notifs_')
-                ) {
-                    // Never overwrite from cloud — these are local-only
-                }
-
-                // ── Everything else (users list, version, etc.) ─────────────
-                else {
-                    if (localStorage.getItem(key) !== value) {
+                } catch {
+                    if (localStr !== value) {
                         originalSetItem.call(localStorage, key, value);
                         changed = true;
                     }
                 }
             }
 
-            if (changed) {
-                console.log('[CloudSync] Synced local state with Neon DB!');
-                if (window.renderDashboard)         window.renderDashboard();
-                if (window.refreshAttendanceSummary) window.refreshAttendanceSummary();
+            // Trigger UI update if dashboard is loaded
+            if (changed && window.renderDashboard) {
+                window.renderDashboard();
             }
         }
     } catch (err) {
-        // Silent fail — app still works from localStorage
+        console.error('Initial Cloud Sync failed:', err);
     }
 };
 
-// ── 3. Adaptive polling: 8 s when visible, 30 s when tab is hidden ────────────
-const POLL_ACTIVE_MS  =  3000;
-const POLL_HIDDEN_MS  = 15000;
-
-let _pollTimer = null;
+// â”€â”€ 3. Background Polling â€” Keep state fresh for all users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const POLL_ACTIVE_MS  =  2000;  // 2s pull when tab is open
+const POLL_HIDDEN_MS  = 10000;  // 10s when hidden
 
 function _schedulePoll() {
-    clearTimeout(_pollTimer);
     const delay = document.hidden ? POLL_HIDDEN_MS : POLL_ACTIVE_MS;
-    _pollTimer = setTimeout(async () => {
-        if (window.initCloudDb) await window.initCloudDb();
-        _schedulePoll();   // re-schedule after each completed poll
+    setTimeout(async () => {
+        await window.initCloudDb();
+        _schedulePoll();
     }, delay);
 }
 
-// Start polling after an initial short pause (let the app boot first)
-setTimeout(_schedulePoll, POLL_ACTIVE_MS);
-
-// Adjust poll frequency instantly when tab visibility changes
-document.addEventListener('visibilitychange', _schedulePoll);
+// Start polling
+_schedulePoll();
