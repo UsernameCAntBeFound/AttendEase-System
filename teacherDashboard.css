@@ -1263,11 +1263,14 @@ input:focus {
     inset: 0;
     background: rgba(17, 24, 39, 0.45);
     backdrop-filter: blur(4px);
+    z-index: 500;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay:not([hidden]) {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 500;
-    animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
@@ -2618,11 +2621,14 @@ body.sidebar-collapsed .hamburger rect {
     inset: 0;
     background: rgba(17, 24, 39, 0.45);
     backdrop-filter: blur(4px);
+    z-index: 500;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay:not([hidden]) {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 500;
-    animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
@@ -3395,9 +3401,15 @@ body.sidebar-collapsed .hamburger rect {
     border-radius: var(--radius);
     box-shadow: 0 12px 40px rgba(75, 120, 229, 0.16), 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 9999;
-    display: flex;
+    display: none;
     flex-direction: column;
     overflow: hidden;
+
+/* Show only when not hidden */
+}
+
+.notif-panel:not([hidden]) {
+    display: flex;
     animation: panelSlide 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 

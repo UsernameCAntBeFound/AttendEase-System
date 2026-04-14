@@ -1225,11 +1225,14 @@ input:focus {
     inset: 0;
     background: rgba(17, 24, 39, 0.35);
     backdrop-filter: blur(6px);
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-overlay:not([hidden]) {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    padding: 20px;
 }
 
 .modal-box {

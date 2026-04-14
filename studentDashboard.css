@@ -7,6 +7,10 @@
     padding: 0;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 :root {
     --bg: #f7f8f3;
     --brand: #6b6b5b;
